@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Cloud Suite — Shellkode</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<style>
+:root{--bg:#07101f;--s1:#0d1a2d;--s2:#112238;--s3:#162b45;--b1:#1c2e47;--b2:#243a58;--acc:#f59e0b;--acc2:#fbbf24;--aglow:rgba(245,158,11,0.13);--blue:#3b82f6;--green:#10b981;--red:#ef4444;--purple:#8b5cf6;--txt:#e2e8f0;--txt2:#94a3b8;--txt3:#4a6080;--fn:'Inter',sans-serif;--mono:'JetBrains Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fn);background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(59,130,246,0.06) 0%,transparent 70%)}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--s1)}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:56px;display:flex;align-items:center;gap:14px;padding:0 24px;background:rgba(7,16,31,0.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--b1)}
+.logo{display:flex;align-items:center;gap:10px}.logo img{height:28px}
+.topbar-title{font-size:13px;font-weight:700;color:var(--txt2);letter-spacing:-.2px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--txt2)}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:var(--txt3);transition:.3s}
+.conn-dot.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+.main{padding-top:56px;min-height:100vh;position:relative;z-index:1}
+.page{display:none}.page.active{display:block}
+/* LOGIN */
+.login-wrap{min-height:calc(100vh - 56px);display:flex;align-items:center;justify-content:center;padding:40px 16px}
+.login-card{width:100%;max-width:480px;background:var(--s1);border:1px solid var(--b2);border-radius:16px;padding:40px;position:relative;overflow:hidden}
+.login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--acc),var(--blue))}
+.login-logo{text-align:center;margin-bottom:24px}.login-logo img{height:40px}
+.login-title{font-size:20px;font-weight:700;margin-bottom:4px;text-align:center}
+.login-sub{font-size:12.5px;color:var(--txt2);margin-bottom:24px;text-align:center;line-height:1.5}
+.info-box{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:10px 14px;font-size:12px;color:#93c5fd;margin-bottom:22px;line-height:1.6}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.fi{width:100%;padding:9px 12px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--txt);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
+.fi:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--aglow)}.fi::placeholder{color:var(--txt3)}
+.module-select{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+.mod-btn{background:var(--s2);border:2px solid var(--b2);border-radius:10px;padding:14px 12px;cursor:pointer;text-align:center;transition:all .18s;user-select:none}
+.mod-btn:hover{border-color:var(--acc);background:var(--aglow)}
+.mod-btn.sel{border-color:var(--acc);background:var(--aglow)}
+.mod-btn .mb-icon{font-size:22px;margin-bottom:4px}
+.mod-btn .mb-name{font-size:11px;font-weight:700;color:var(--txt)}
+.mod-btn .mb-desc{font-size:9.5px;color:var(--txt3);margin-top:2px}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:8px;border:none;font-family:var(--fn);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-primary{background:var(--acc);color:#000;box-shadow:0 2px 10px rgba(245,158,11,.3)}
+.btn-primary:not(:disabled):hover{background:var(--acc2);transform:translateY(-1px)}
+.btn-full{width:100%}.btn-outline{background:transparent;border:1px solid var(--b2);color:var(--txt2)}
+.btn-outline:hover{border-color:var(--acc);color:var(--acc);background:var(--aglow)}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:not(:disabled):hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-green{background:var(--green);color:#fff}.btn-green:not(:disabled):hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-purple{background:var(--purple);color:#fff}.btn-purple:not(:disabled):hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-sm{padding:6px 12px;font-size:12px}.btn-red{background:var(--red);color:#fff}
+.alert{padding:9px 13px;border-radius:8px;font-size:12px;margin-top:10px;display:none}
+.alert-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+.alert-success{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#6ee7b7}
+/* DASHBOARD LAYOUT */
+.dashboard{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:260px;min-width:260px;background:var(--s1);border-right:1px solid var(--b1);padding:20px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;z-index:10}
+.sb-s{padding:0 16px;margin-bottom:20px}
+.sb-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-bottom:8px}
+.chip{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:7px 10px;font-size:11px;color:var(--txt2);margin-bottom:5px;width:100%;display:block}
+.chip span{color:var(--acc);font-family:var(--mono);font-size:10.5px;display:block;margin-top:2px;word-break:break-all}
+/* Module nav tabs */
+.mod-tabs{padding:0 16px;margin-bottom:8px}
+.mod-tab{display:flex;align-items:center;gap:9px;padding:10px 12px;font-size:12.5px;font-weight:600;color:var(--txt2);cursor:pointer;border-radius:8px;margin-bottom:4px;transition:all .15s;border:1px solid transparent}
+.mod-tab:hover{color:var(--txt);background:var(--s2)}
+.mod-tab.active{color:var(--acc);background:var(--aglow);border-color:rgba(245,158,11,.2)}
+.mod-tab .mt-icon{font-size:16px;width:20px;text-align:center}
+.sb-divider{height:1px;background:var(--b1);margin:10px 16px}
+/* Region panel in sidebar */
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 16px;font-size:12px;color:var(--txt2);cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{color:var(--txt);background:var(--s2)}.nav-item.active{color:var(--acc);background:var(--aglow);border-left-color:var(--acc)}
+.content{flex:1;padding:24px 28px;overflow-x:hidden;min-width:0}
+/* Page headers */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.ph-title{font-size:21px;font-weight:700;letter-spacing:-.3px}.ph-sub{font-size:12.5px;color:var(--txt2);margin-top:3px}
+.ph-act{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* Service grid (grouped) */
+.svc-group{margin-bottom:20px}
+.svc-group-hd{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-bottom:8px;padding-left:2px;display:flex;align-items:center;gap:8px}
+.svc-group-hd::after{content:'';flex:1;height:1px;background:var(--b1)}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.svc-card{background:var(--s2);border:1px solid var(--b2);border-radius:9px;padding:10px 12px;cursor:pointer;transition:all .18s;user-select:none;display:flex;align-items:center;gap:9px}
+.svc-card:hover{background:var(--s3)}.svc-card.sel{border-color:var(--acc);background:var(--aglow);box-shadow:0 0 0 1px var(--acc)}
+.svc-card.hidden{display:none}
+.svc-card .si{font-size:16px;flex-shrink:0}.svc-card .sn{font-size:11.5px;font-weight:600}.svc-card .sl{font-size:10px;color:var(--txt3)}
+.svc-chk{margin-left:auto;width:15px;height:15px;border-radius:50%;border:2px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;transition:all .18s}
+.svc-card.sel .svc-chk{background:var(--acc);border-color:var(--acc);color:#000}
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:11px;margin-bottom:22px}
+.stat-card{background:var(--s1);border:1px solid var(--b1);border-radius:9px;padding:14px 16px}
+.stat-v{font-size:22px;font-weight:700;font-family:var(--mono);color:var(--acc)}.stat-l{font-size:11px;color:var(--txt2);margin-top:3px}
+/* Scan progress */
+.scan-box{background:var(--s1);border:1px solid var(--b1);border-radius:9px;padding:18px 20px;margin-bottom:20px;display:none}
+.scan-hd{display:flex;align-items:center;gap:11px;margin-bottom:10px;font-size:13.5px;font-weight:600}
+.scan-bar{height:4px;background:var(--s3);border-radius:2px;overflow:hidden}
+.scan-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--blue));border-radius:2px;width:0%;transition:width .35s ease}
+.scan-st{font-size:11.5px;color:var(--txt2);margin-top:6px}
+/* Search */
+.search-wrap{position:relative;margin-bottom:12px}
+.search-wrap input{width:100%;padding:9px 12px 9px 36px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--txt);font-family:var(--fn);font-size:13px;outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--acc)}.search-wrap input::placeholder{color:var(--txt3)}
+.search-wrap .si{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:14px}
+.inv-search{position:relative;margin-bottom:18px}
+.inv-search input{width:100%;padding:8px 12px 8px 34px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--txt);font-family:var(--fn);font-size:12.5px;outline:none;transition:border-color .2s}
+.inv-search input:focus{border-color:var(--acc)}.inv-search input::placeholder{color:var(--txt3)}
+.inv-search .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:13px}
+/* Inventory tables */
+.inv-section{background:var(--s1);border:1px solid var(--b1);border-radius:11px;margin-bottom:20px;overflow:hidden}
+.inv-hd{padding:12px 16px;display:flex;align-items:center;gap:9px;background:var(--s2);border-bottom:1px solid var(--b1)}
+.inv-title{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.inv-badge{background:var(--aglow);border:1px solid rgba(245,158,11,.3);color:var(--acc);font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:20px;font-family:var(--mono)}
+.inv-err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#fca5a5}
+.tbl-wrap{overflow-x:auto}
+.inv-tbl{width:100%;border-collapse:collapse;font-size:11.5px;white-space:nowrap}
+.inv-tbl th{padding:8px 12px;text-align:left;background:var(--s3);color:var(--txt2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--b1);border-right:1px solid var(--b1);position:sticky;top:0}
+.inv-tbl th:last-child{border-right:none}
+.inv-tbl td{padding:7px 12px;border-bottom:1px solid var(--b1);border-right:1px solid var(--b1);color:var(--txt2);vertical-align:middle;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.inv-tbl td:last-child{border-right:none}
+.inv-tbl tr:last-child td{border-bottom:none}.inv-tbl tr:hover td{background:var(--s2)}
+.tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10.5px;font-family:var(--mono)}
+.tg{background:rgba(16,185,129,.1);color:#6ee7b7;border:1px solid rgba(16,185,129,.2)}
+.tr{background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.2)}
+.tb{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+.tgr{background:rgba(100,116,139,.12);color:var(--txt3);border:1px solid var(--b1)}
+.tw{background:rgba(245,158,11,.1);color:#fcd34d;border:1px solid rgba(245,158,11,.2)}
+/* Cost specific */
+.cost-section{background:var(--s1);border:1px solid var(--b1);border-radius:11px;margin-bottom:20px;overflow:hidden}
+.cost-hd{padding:12px 16px;display:flex;align-items:center;gap:9px;background:var(--s2);border-bottom:1px solid var(--b1);font-size:13.5px;font-weight:700}
+.cost-tbl th{background:var(--s3);color:var(--txt2);font-size:10px;font-weight:700;text-transform:uppercase;padding:8px 12px;text-align:right;border:1px solid var(--b1)}
+.cost-tbl th:first-child{text-align:left}
+.cost-tbl td{padding:7px 12px;border:1px solid var(--b1);font-size:11.5px;color:var(--txt2);text-align:right}
+.cost-tbl td:first-child{text-align:left;font-weight:500;color:var(--txt)}
+.cost-tbl tr:hover td{background:var(--s2)}
+.cost-pos{color:#6ee7b7}.cost-neg{color:#fca5a5}
+/* Security specific */
+.sec-sev-critical{color:#ef4444;font-weight:700}
+.sec-sev-high{color:#f97316;font-weight:700}
+.sec-sev-medium{color:#f59e0b;font-weight:600}
+.sec-sev-low{color:#10b981;font-weight:600}
+.sec-sev-informational{color:var(--txt3)}
+/* Monthly report */
+.util-good{color:#6ee7b7}.util-warn{color:#fcd34d}.util-bad{color:#fca5a5}
+/* Home module cards */
+.home-mod-card{background:var(--s1);border:2px solid var(--b2);border-radius:14px;padding:28px 24px;cursor:pointer;transition:all .2s;user-select:none}
+.home-mod-card:hover{border-color:var(--acc);background:var(--aglow);transform:translateY(-2px);box-shadow:0 6px 24px rgba(245,158,11,.12)}
+.hmc-icon{font-size:36px;margin-bottom:14px}
+.hmc-title{font-size:16px;font-weight:700;color:var(--txt);margin-bottom:8px}
+.hmc-desc{font-size:12px;color:var(--txt2);line-height:1.7}
+/* Overlay/Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(5px);z-index:300;display:none;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:13px;padding:28px;width:420px;max-width:95vw;position:relative}
+.modal-t{font-size:16px;font-weight:700;margin-bottom:4px}.modal-s{font-size:12px;color:var(--txt2);margin-bottom:20px}
+.modal-act{display:flex;gap:8px;margin-top:20px;justify-content:flex-end}
+.modal-x{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--txt3);font-size:19px;cursor:pointer}
+.modal-x:hover{color:var(--txt)}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(245,158,11,.3);border-top-color:var(--acc);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.no-results{text-align:center;padding:18px;color:var(--txt3);font-size:12.5px;font-style:italic}
+@media(max-width:768px){.sidebar{display:none}.content{padding:16px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">
+    <img id="topbarLogo" src="/logo" alt="Shellkode" onerror="this.style.display='none'">
+    <span class="topbar-title">AWS Cloud Suite</span>
+  </div>
+  <div class="topbar-right">
+    <div class="conn-dot" id="connDot"></div>
+    <span id="connText">Not connected</span>
+  </div>
+</header>
+<main class="main">
+<!-- ══════ LOGIN ══════ -->
+<div class="page active" id="pageLogin">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo"><img src="/logo" alt="Shellkode" style="height:40px" onerror="this.style.display='none'"></div>
+      <div class="login-title">AWS Cloud Management Suite</div>
+      <div class="login-sub">Sign in with your IAM Access Key to get started</div>
+      <div class="info-box">ℹ️ <strong>Credentials:</strong> AWS Console → IAM → Users → Security credentials → Create access key</div>
+      <div class="fg"><label class="fl">Access Key ID</label><input class="fi" id="accessKey" placeholder="AKIAIOSFODNN7EXAMPLE" type="text" autocomplete="off" spellcheck="false"></div>
+      <div class="fg"><label class="fl">Secret Access Key</label><input class="fi" id="secretKey" placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" type="password" autocomplete="off"></div>
+      <button class="btn btn-primary btn-full" id="loginBtn" onclick="doLogin()"><span id="loginTxt">Sign In</span></button>
+      <div class="alert alert-error" id="loginErr"></div>
+      <div class="alert alert-success" id="loginOk"></div>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--b1);font-size:11px;color:var(--txt3)">🛡️ Credentials sent only to your local backend — never stored externally.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ DASHBOARD ══════ -->
+<div class="page" id="pageDash">
+  <div class="dashboard">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-s">
+        <div class="sb-lbl">Account</div>
+        <div class="chip">Account Name<span id="sbAccName" style="color:var(--green)">—</span></div>
+        <div class="chip">Account ID<span id="sbAccount">—</span></div>
+        <div class="chip">IAM ARN<span id="sbUser">—</span></div>
+      </div>
+      <!-- Region select (shown for inventory/cost/monthly) -->
+      <div class="sb-s" id="sidebarRegions">
+        <div class="sb-lbl">Region <span style="color:var(--acc);font-size:9px;font-weight:700">(MULTI-SELECT)</span></div>
+        <div style="position:relative;margin-bottom:6px">
+          <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:12px">🔍</span>
+          <input id="regionSearch" type="text" placeholder="Search regions..." oninput="filterRegions(this.value)"
+            style="width:100%;padding:7px 8px 7px 28px;background:var(--s2);border:1px solid var(--b2);border-radius:7px;color:var(--txt);font-size:12px;outline:none">
+        </div>
+        <div id="regionList" style="max-height:160px;overflow-y:auto;background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:4px"></div>
+        <div style="margin-top:6px;display:flex;gap:6px">
+          <button class="btn btn-outline btn-sm" style="flex:1;font-size:10px;padding:4px" onclick="selAllRegions()">All</button>
+          <button class="btn btn-outline btn-sm" style="flex:1;font-size:10px;padding:4px" onclick="clrAllRegions()">Clear</button>
+        </div>
+        <div id="selRegionTags" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px"></div>
+      </div>
+      <div class="sb-divider"></div>
+      <!-- Module Tabs -->
+      <div class="mod-tabs">
+        <div class="sb-lbl" style="padding:0 0 8px">Modules</div>
+        <div class="mod-tab active" id="modTabInventory" onclick="switchModule('inventory')"><span class="mt-icon">📦</span> Inventory</div>
+        <div class="mod-tab" id="modTabCost" onclick="switchModule('cost')"><span class="mt-icon">💰</span> Cost Optimization</div>
+        <div class="mod-tab" id="modTabSecurity" onclick="switchModule('security')"><span class="mt-icon">🔒</span> Security Audit</div>
+        <div class="mod-tab" id="modTabMonthly" onclick="switchModule('monthly')"><span class="mt-icon">📊</span> Monthly Report</div>
+      </div>
+      <div class="sb-s" style="margin-top:12px">
+        <button class="btn btn-outline btn-sm btn-full" onclick="signOut()">← Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <div class="content">
+
+      <!-- ════ MODULE HOME — shown first after login ════ -->
+      <div id="moduleHome" class="module-content">
+        <div style="margin-bottom:28px">
+          <div class="ph-title" style="font-size:23px">👋 Welcome to AWS Cloud Suite</div>
+          <div class="ph-sub" style="margin-top:6px">Signed in as <span style="color:var(--acc);font-family:var(--mono)" id="homeArn">—</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px">
+          <div class="home-mod-card" onclick="switchModule('inventory')">
+            <div class="hmc-icon">📦</div>
+            <div class="hmc-title">Inventory</div>
+            <div class="hmc-desc">Scan 200+ AWS services across selected regions and export a full resource inventory as HTML or Excel.</div>
+          </div>
+          <div class="home-mod-card" onclick="switchModule('cost')">
+            <div class="hmc-icon">💰</div>
+            <div class="hmc-title">Cost Optimization</div>
+            <div class="hmc-desc">3-month billing analysis with idle resource detection — stopped EC2, unattached volumes, stale snapshots.</div>
+          </div>
+          <div class="home-mod-card" onclick="switchModule('security')">
+            <div class="hmc-icon">🔒</div>
+            <div class="hmc-title">Security Audit</div>
+            <div class="hmc-desc">Run a Prowler-powered security scan across all regions using your login credentials. Export as HTML &amp; Excel.</div>
+          </div>
+          <div class="home-mod-card" onclick="switchModule('monthly')">
+            <div class="hmc-icon">📊</div>
+            <div class="hmc-title">Monthly Report</div>
+            <div class="hmc-desc">Last 2 months billing comparison + 30-day EC2 &amp; RDS utilization. Export as DOCX &amp; Excel.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ MODULE: INVENTORY ════ -->
+      <div id="moduleInventory" class="module-content" style="display:none">
+        <!-- Service Selector Panel -->
+        <div id="panelSvc">
+          <div class="ph">
+            <div><div class="ph-title">📦 Inventory — Service Selector</div><div class="ph-sub" id="svcSub">Select regions, then choose services to scan</div></div>
+            <div class="ph-act">
+              <button class="btn btn-outline btn-sm" onclick="selAll()">Select All</button>
+              <button class="btn btn-outline btn-sm" onclick="clrAll()">Clear</button>
+              <button class="btn btn-primary" id="scanBtn" onclick="startScan()" disabled>🔍 Scan Resources</button>
+            </div>
+          </div>
+          <div class="search-wrap">
+            <span class="si">🔍</span>
+            <input type="text" placeholder="Search services... (e.g. EC2, S3, Lambda)" oninput="filterServices(this.value)" id="svcSearch">
+          </div>
+          <div style="font-size:11.5px;color:var(--txt2);margin-bottom:16px" id="svcCount"></div>
+          <div id="svcGroupsContainer"></div>
+        </div>
+        <!-- Inventory Results Panel -->
+        <div id="panelInv" style="display:none">
+          <div class="ph">
+            <div><div class="ph-title">📦 Resource Inventory</div><div class="ph-sub" id="invSub">—</div></div>
+            <div class="ph-act">
+              <button class="btn btn-blue btn-sm" id="btnHtml" onclick="openExport('html')" disabled>🌐 Export HTML</button>
+              <button class="btn btn-green btn-sm" id="btnXlsx" onclick="openExport('xlsx')" disabled>📊 Export Excel</button>
+              <button class="btn btn-outline btn-sm" onclick="showPanel('svc')">← Back</button>
+            </div>
+          </div>
+          <div class="stats-row" id="statsRow"></div>
+          <div class="scan-box" id="scanBox">
+            <div class="scan-hd"><div class="spin"></div> Scanning AWS resources...</div>
+            <div class="scan-bar"><div class="scan-fill" id="scanFill"></div></div>
+            <div class="scan-st" id="scanSt">Initializing...</div>
+          </div>
+          <div class="inv-search" id="invSearchWrap" style="display:none">
+            <span class="si">🔍</span>
+            <input type="text" placeholder="Search resources across all services..." oninput="filterInventory(this.value)" id="invSearchInput">
+          </div>
+          <div id="invTables"></div>
+        </div>
+      </div>
+
+      <!-- ════ MODULE: COST OPTIMIZATION ════ -->
+      <div id="moduleCost" class="module-content" style="display:none">
+        <div class="ph">
+          <div><div class="ph-title">💰 Cost Optimization</div><div class="ph-sub" id="costSub">3-month cost analysis + optimization recommendations</div></div>
+          <div class="ph-act">
+            <button class="btn btn-primary" id="costRunBtn" onclick="runCostReport()">📊 Run Cost Analysis</button>
+            <button class="btn btn-green btn-sm" id="costXlsxBtn" onclick="exportCostXLSX()" disabled>📊 Export Excel</button>
+            <button class="btn btn-blue btn-sm" id="costHtmlBtn" onclick="exportCostHTML()" disabled>🌐 Export HTML</button>
+          </div>
+        </div>
+        <div class="scan-box" id="costScanBox">
+          <div class="scan-hd"><div class="spin"></div> Analyzing AWS costs...</div>
+          <div class="scan-bar"><div class="scan-fill" id="costFill"></div></div>
+          <div class="scan-st" id="costSt">Fetching cost data...</div>
+        </div>
+        <div id="costResults"></div>
+      </div>
+
+      <!-- ════ MODULE: SECURITY AUDIT ════ -->
+      <div id="moduleSecurity" class="module-content" style="display:none">
+        <div class="ph">
+          <div><div class="ph-title">🔒 Security Audit</div><div class="ph-sub">Prowler-powered AWS security assessment (all regions)</div></div>
+          <div class="ph-act">
+            <button class="btn btn-primary" id="secRunBtn" onclick="runSecurityScan()">🔍 Run Prowler Scan</button>
+            <button class="btn btn-green btn-sm" id="secXlsxBtn" onclick="exportSecXLSX()" disabled>📊 Export Excel</button>
+            <button class="btn btn-blue btn-sm" id="secHtmlBtn" onclick="exportSecHTML()" disabled>🌐 Export HTML</button>
+          </div>
+        </div>
+        <div class="scan-box" id="secScanBox">
+          <div class="scan-hd"><div class="spin"></div> Running Prowler security scan...</div>
+          <div class="scan-bar"><div class="scan-fill" id="secFill"></div></div>
+          <div class="scan-st" id="secSt">Checking Prowler installation...</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:20px;margin-bottom:20px">
+          <div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:10px">ℹ️ About Security Audit</div>
+          <div style="font-size:12px;color:var(--txt2);line-height:1.8">
+            This module runs <strong style="color:var(--txt)">Prowler</strong> — an open-source AWS security scanner — using your login credentials across all enabled regions.<br>
+            It runs a <strong style="color:var(--acc)">focused set of ~45 high-value checks</strong> covering IAM, S3, EC2, RDS, CloudTrail, GuardDuty, KMS, VPC, and more.<br><br>
+            <strong style="color:var(--txt)">⚡ Auto-Install:</strong> If Prowler is not installed, clicking <em>Run Prowler Scan</em> will automatically install it into your virtual environment.<br><br>
+            <strong style="color:var(--txt)">Manual install:</strong>
+            <code style="background:var(--s2);padding:3px 8px;border-radius:4px;font-size:11px;color:var(--acc)">source venv/bin/activate &amp;&amp; pip install prowler</code><br><br>
+            <strong style="color:var(--txt)">⏱ Duration:</strong> ~5–20 minutes depending on how many AWS regions are enabled in your account.
+          </div>
+        </div>
+        <div id="secResults"></div>
+      </div>
+
+      <!-- ════ MODULE: MONTHLY REPORT ════ -->
+      <div id="moduleMonthly" class="module-content" style="display:none">
+        <div class="ph">
+          <div><div class="ph-title">📊 Monthly Report</div><div class="ph-sub">Last 2 months billing diff + 30-day EC2/RDS utilization (all running instances)</div></div>
+          <div class="ph-act">
+            <button class="btn btn-primary" id="monthlyRunBtn" onclick="runMonthlyReport()">📊 Generate Report</button>
+            <button class="btn btn-green btn-sm" id="monthlyXlsxBtn" onclick="exportMonthlyXLSX()" disabled>📊 Export Excel</button>
+            <button class="btn btn-purple btn-sm" id="monthlyDocxBtn" onclick="exportMonthlyDOCX()" disabled>📄 Export Word</button>
+          </div>
+        </div>
+        <div class="scan-box" id="monthlyScanBox">
+          <div class="scan-hd"><div class="spin"></div> Generating monthly report...</div>
+          <div class="scan-bar"><div class="scan-fill" id="monthlyFill"></div></div>
+          <div class="scan-st" id="monthlySt">Fetching billing and utilization data...</div>
+        </div>
+        <div id="monthlyResults"></div>
+      </div>
+
+    </div><!-- end content -->
+  </div><!-- end dashboard -->
+</div><!-- end pageDash -->
+</main>
+
+<!-- Export Modal -->
+<div class="overlay" id="exportOverlay">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">×</button>
+    <div class="modal-t">📤 Export Report</div>
+    <div class="modal-s" id="exportSub">Enter customer name</div>
+    <div class="fg"><label class="fl">Customer Name</label><input class="fi" id="custName" placeholder="e.g. Acme Corporation" type="text"></div>
+    <div class="modal-act">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmExport()">Generate &amp; Download</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// GLOBAL STATE
+// ═══════════════════════════════════════════════════
+let ST = {ak:'',sk:'',account:'',accName:'',username:'',arn:'',regions:new Set(),
+  selected:new Set(), invData:{}, costData:null, secData:null, monthlyData:null};
+let selectedMod = 'inventory';
+let pendingExportType = '', pendingExportModule = '';
+function apiBase(){return window.location.origin}
+
+// ═══════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════
+function selectMod(mod){
+  selectedMod = mod;
+  document.querySelectorAll('.mod-btn').forEach(b=>b.classList.remove('sel'));
+  document.querySelector(`.mod-btn[data-mod="${mod}"]`).classList.add('sel');
+}
+
+async function doLogin(){
+  const ak=document.getElementById('accessKey').value.trim();
+  const sk=document.getElementById('secretKey').value.trim();
+  document.getElementById('loginErr').style.display='none';
+  document.getElementById('loginOk').style.display='none';
+  if(!ak.startsWith('AK')){showAlert('loginErr','Access Key ID must start with AK');return}
+  if(sk.length<20){showAlert('loginErr','Secret Access Key appears too short');return}
+  setBtnL('loginBtn','loginTxt','Verifying with AWS...');
+  try{
+    const r=await fetch(`${apiBase()}/auth`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accessKey:ak,secretKey:sk})});
+    const d=await r.json();
+    if(!d.success){showAlert('loginErr',d.error||'Authentication failed');setBtnD('loginBtn','loginTxt','Sign In');return}
+    ST.ak=ak;ST.sk=sk;ST.account=d.accountId;ST.accName=d.accountName||d.accountId;
+    ST.username=d.username;ST.arn=d.arn;
+    showAlert('loginOk',`✅ Authenticated as ${d.arn}`);
+    setTimeout(async()=>{
+      showPage('pageDash');
+      document.getElementById('sbAccName').textContent=d.accountName||'N/A';
+      document.getElementById('sbAccount').textContent=d.accountId;
+      document.getElementById('sbUser').textContent=d.arn;
+      document.getElementById('homeArn').textContent=d.arn;
+      document.getElementById('connDot').classList.add('on');
+      document.getElementById('connText').textContent=d.username;
+      buildSvcGroups();
+      await loadRegions();
+      switchModule('home');
+    },700);
+  }catch(e){showAlert('loginErr','Cannot reach backend.');setBtnD('loginBtn','loginTxt','Sign In')}
+}
+
+// ═══════════════════════════════════════════════════
+// REGIONS
+// ═══════════════════════════════════════════════════
+const REGION_NAMES={
+  'us-east-1':'US East (N. Virginia)','us-east-2':'US East (Ohio)',
+  'us-west-1':'US West (N. California)','us-west-2':'US West (Oregon)',
+  'ap-south-1':'Asia Pacific (Mumbai)','ap-southeast-1':'Asia Pacific (Singapore)',
+  'ap-southeast-2':'Asia Pacific (Sydney)','ap-northeast-1':'Asia Pacific (Tokyo)',
+  'ap-northeast-2':'Asia Pacific (Seoul)','ap-northeast-3':'Asia Pacific (Osaka)',
+  'eu-west-1':'Europe (Ireland)','eu-west-2':'Europe (London)',
+  'eu-west-3':'Europe (Paris)','eu-central-1':'Europe (Frankfurt)',
+  'eu-north-1':'Europe (Stockholm)','eu-south-1':'Europe (Milan)',
+  'ca-central-1':'Canada (Central)','sa-east-1':'South America (São Paulo)',
+  'af-south-1':'Africa (Cape Town)','me-south-1':'Middle East (Bahrain)',
+  'ap-east-1':'Asia Pacific (Hong Kong)','ap-southeast-3':'Asia Pacific (Jakarta)',
+};
+let ALL_REGIONS=[];
+
+async function loadRegions(){
+  try{
+    const r=await fetch(`${apiBase()}/regions`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accessKey:ST.ak,secretKey:ST.sk})});
+    const d=await r.json();
+    ALL_REGIONS=d.regions||[];
+  }catch(e){
+    ALL_REGIONS=['us-east-1','us-east-2','us-west-1','us-west-2','ap-south-1','ap-southeast-1','ap-southeast-2','ap-northeast-1','ap-northeast-2','eu-west-1','eu-west-2','eu-central-1','ca-central-1','sa-east-1'];
+  }
+  renderRegionList('');
+}
+
+function renderRegionList(q){
+  const lq=q.toLowerCase();
+  const list=document.getElementById('regionList');
+  list.innerHTML=ALL_REGIONS.filter(r=>!q||r.includes(lq)||(REGION_NAMES[r]||'').toLowerCase().includes(lq)).map(r=>{
+    const label=REGION_NAMES[r]?`${r} — ${REGION_NAMES[r]}`:r;
+    const sel=ST.regions.has(r);
+    return`<label style="display:flex;align-items:center;gap:7px;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:11px;color:${sel?'var(--acc)':'var(--txt2)'};background:${sel?'var(--aglow)':'transparent'};margin-bottom:1px">
+      <input type="checkbox" value="${r}" ${sel?'checked':''} onchange="toggleRegion('${r}',this.checked)" style="accent-color:var(--acc);flex-shrink:0">
+      <span>${label}</span></label>`;
+  }).join('');
+  updateRegionTags();
+}
+function filterRegions(q){renderRegionList(q)}
+function toggleRegion(r,checked){
+  if(checked)ST.regions.add(r);else ST.regions.delete(r);
+  updateRegionTags();
+  const scanBtn=document.getElementById('scanBtn');
+  if(scanBtn)scanBtn.disabled=ST.regions.size===0;
+}
+function updateRegionTags(){
+  document.getElementById('selRegionTags').innerHTML=[...ST.regions].map(r=>
+    `<span style="background:var(--aglow);border:1px solid rgba(245,158,11,.3);color:var(--acc);font-size:10px;padding:2px 5px;border-radius:4px;font-family:var(--mono)">${r}</span>`
+  ).join('');
+}
+function selAllRegions(){ALL_REGIONS.forEach(r=>ST.regions.add(r));renderRegionList(document.getElementById('regionSearch').value);}
+function clrAllRegions(){ST.regions.clear();renderRegionList(document.getElementById('regionSearch').value);}
+
+// ═══════════════════════════════════════════════════
+// MODULE SWITCHING
+// ═══════════════════════════════════════════════════
+function switchModule(mod){
+  document.querySelectorAll('.module-content').forEach(m=>m.style.display='none');
+  document.querySelectorAll('.mod-tab').forEach(t=>t.classList.remove('active'));
+  const elId = mod==='home' ? 'moduleHome' : `module${mod.charAt(0).toUpperCase()+mod.slice(1)}`;
+  const el = document.getElementById(elId);
+  if(el) el.style.display='block';
+  const tab = document.getElementById(`modTab${mod.charAt(0).toUpperCase()+mod.slice(1)}`);
+  if(tab) tab.classList.add('active');
+  // Show/hide region panel: hidden for security (all regions) and home
+  document.getElementById('sidebarRegions').style.display = (mod==='security'||mod==='home')?'none':'block';
+  selectedMod=mod;
+}
+
+// ═══════════════════════════════════════════════════
+// ══ MODULE 1: INVENTORY ══
+// ═══════════════════════════════════════════════════
+// Service groups definition
+const SVC_GROUPS = [
+  {group:'Compute',icon:'🖥️',svcs:[
+    {id:'ec2',name:'EC2 Instances',icon:'🖥️'},{id:'ec2_ami',name:'AMIs',icon:'💿'},
+    {id:'ec2_sg',name:'Security Groups',icon:'🔒'},{id:'ec2_keypair',name:'Key Pairs',icon:'🗝️'},
+    {id:'ec2_eip',name:'Elastic IPs',icon:'🌐'},{id:'ec2_snapshot',name:'EBS Snapshots',icon:'📸'},
+    {id:'ec2_volume',name:'EBS Volumes',icon:'💾'},{id:'autoscaling',name:'Auto Scaling',icon:'📈'},
+    {id:'lightsail',name:'Lightsail',icon:'💡'},{id:'batch',name:'Batch',icon:'⚙️'},
+    {id:'elasticbeanstalk',name:'Elastic Beanstalk',icon:'🌱'},
+  ]},
+  {group:'Container',icon:'🐳',svcs:[
+    {id:'eks',name:'EKS',icon:'☸️'},{id:'ecs',name:'ECS',icon:'🐳'},{id:'ecr',name:'ECR',icon:'📦'},
+  ]},
+  {group:'Serverless',icon:'⚡',svcs:[
+    {id:'lambda',name:'Lambda',icon:'⚡'},{id:'lambda_layer',name:'Lambda Layers',icon:'🍰'},
+    {id:'stepfunctions',name:'Step Functions',icon:'🔗'},
+  ]},
+  {group:'Storage',icon:'📁',svcs:[
+    {id:'s3',name:'S3 Buckets',icon:'🪣'},{id:'efs',name:'EFS',icon:'📁'},
+    {id:'fsx',name:'FSx',icon:'🗂️'},{id:'storagegateway',name:'Storage Gateway',icon:'🔌'},
+    {id:'backup',name:'AWS Backup',icon:'🔄'},{id:'transfer',name:'Transfer Family',icon:'📤'},
+    {id:'datasync',name:'DataSync',icon:'🔃'},
+  ]},
+  {group:'Database',icon:'🗄️',svcs:[
+    {id:'rds',name:'RDS',icon:'🗄️'},{id:'rds_snapshot',name:'RDS Snapshots',icon:'📷'},
+    {id:'dynamodb',name:'DynamoDB',icon:'💎'},{id:'elasticache',name:'ElastiCache',icon:'⚡'},
+    {id:'redshift',name:'Redshift',icon:'🔴'},{id:'docdb',name:'DocumentDB',icon:'📄'},
+    {id:'neptune',name:'Neptune',icon:'🔵'},{id:'dax',name:'DynamoDB DAX',icon:'⚡'},
+  ]},
+  {group:'Networking',icon:'🌐',svcs:[
+    {id:'vpc',name:'VPC',icon:'🌐'},{id:'subnet',name:'Subnets',icon:'🔗'},
+    {id:'routetable',name:'Route Tables',icon:'🗺️'},{id:'igw',name:'Internet Gateways',icon:'🚪'},
+    {id:'nat',name:'NAT Gateways',icon:'🔀'},{id:'vpn',name:'VPN Connections',icon:'🔐'},
+    {id:'directconnect',name:'Direct Connect',icon:'📡'},{id:'elb',name:'Load Balancers',icon:'⚖️'},
+    {id:'cloudfront',name:'CloudFront',icon:'🚀'},{id:'route53',name:'Route 53',icon:'🗺️'},
+    {id:'route53_record',name:'Route 53 Records',icon:'📋'},{id:'apigw',name:'API Gateway',icon:'🔌'},
+    {id:'apigwv2',name:'API Gateway v2',icon:'🔌'},{id:'vpc_peering',name:'VPC Peering',icon:'🔗'},
+    {id:'nacl',name:'Network ACLs',icon:'🛡️'},{id:'transit_gw',name:'Transit Gateway',icon:'🔄'},
+    {id:'globalaccelerator',name:'Global Accelerator',icon:'🌍'},
+  ]},
+  {group:'Security & IAM',icon:'🔑',svcs:[
+    {id:'iam',name:'IAM Users',icon:'🔑'},{id:'iam_role',name:'IAM Roles',icon:'🎭'},
+    {id:'iam_policy',name:'IAM Policies',icon:'📜'},{id:'iam_group',name:'IAM Groups',icon:'👥'},
+    {id:'kms',name:'KMS Keys',icon:'🔐'},{id:'secrets',name:'Secrets Manager',icon:'🗝️'},
+    {id:'acm',name:'ACM Certificates',icon:'🏆'},{id:'waf',name:'WAF',icon:'🛡️'},
+    {id:'shield',name:'Shield',icon:'🔰'},{id:'guardduty',name:'GuardDuty',icon:'👁️'},
+    {id:'inspector',name:'Inspector',icon:'🔍'},{id:'securityhub',name:'Security Hub',icon:'🏛️'},
+    {id:'cognito',name:'Cognito',icon:'👤'},
+  ]},
+  {group:'Messaging & Events',icon:'📣',svcs:[
+    {id:'sns',name:'SNS',icon:'📣'},{id:'sqs',name:'SQS',icon:'📬'},
+    {id:'ses',name:'SES',icon:'📧'},{id:'eventbridge',name:'EventBridge',icon:'⚡'},
+    {id:'mq',name:'Amazon MQ',icon:'📨'},{id:'pinpoint',name:'Pinpoint',icon:'📍'},
+  ]},
+  {group:'Analytics',icon:'📊',svcs:[
+    {id:'kinesis',name:'Kinesis Streams',icon:'🌊'},{id:'kinesis_firehose',name:'Kinesis Firehose',icon:'🔥'},
+    {id:'glue',name:'Glue',icon:'🧩'},{id:'emr',name:'EMR',icon:'📊'},
+    {id:'opensearch',name:'OpenSearch',icon:'🔍'},{id:'msk',name:'MSK (Kafka)',icon:'📡'},
+  ]},
+  {group:'ML / AI',icon:'🤖',svcs:[{id:'sagemaker',name:'SageMaker',icon:'🤖'}]},
+  {group:'Monitoring & DevOps',icon:'📋',svcs:[
+    {id:'cloudwatch',name:'CloudWatch Alarms',icon:'📊'},{id:'cloudwatch_log',name:'Log Groups',icon:'📋'},
+    {id:'cloudtrail',name:'CloudTrail',icon:'👣'},{id:'config',name:'AWS Config',icon:'⚙️'},
+    {id:'xray',name:'X-Ray',icon:'🔬'},{id:'codecommit',name:'CodeCommit',icon:'💻'},
+    {id:'codebuild',name:'CodeBuild',icon:'🏗️'},{id:'codepipeline',name:'CodePipeline',icon:'🔄'},
+    {id:'cloudformation',name:'CloudFormation',icon:'🏗️'},{id:'ssm',name:'Systems Manager',icon:'🖥️'},
+    {id:'ssm_param',name:'SSM Parameters',icon:'⚙️'},
+  ]},
+  {group:'Management',icon:'🏢',svcs:[
+    {id:'organizations',name:'Organizations',icon:'🏢'},{id:'workspaces',name:'WorkSpaces',icon:'🖥️'},
+    {id:'amplify',name:'Amplify',icon:'🔊'},{id:'appsync',name:'AppSync',icon:'🔄'},
+  ]},
+];
+
+const GLOBAL_SVCS = new Set(['iam','iam_role','iam_policy','iam_group','cloudfront','route53','route53_record','s3','organizations','shield','globalaccelerator','waf']);
+
+// Build flat SVCS array for lookup
+const SVCS = SVC_GROUPS.flatMap(g=>g.svcs.map(s=>({...s,lbl:g.group})));
+
+function buildSvcGroups(){
+  const container = document.getElementById('svcGroupsContainer');
+  container.innerHTML = SVC_GROUPS.map(g=>`
+    <div class="svc-group" data-group="${g.group}">
+      <div class="svc-group-hd">${g.icon} ${g.group}</div>
+      <div class="svc-grid">
+        ${g.svcs.map(s=>`<div class="svc-card" id="sc-${s.id}" onclick="togSvc('${s.id}')">
+          <span class="si">${s.icon}</span>
+          <div><div class="sn">${s.name}</div></div>
+          <div class="svc-chk" id="chk-${s.id}">✓</div>
+        </div>`).join('')}
+      </div>
+    </div>`).join('');
+  const total = SVCS.length;
+  document.getElementById('svcCount').textContent = `${total} services available across ${SVC_GROUPS.length} groups`;
+}
+
+function filterServices(q){
+  const lq=q.toLowerCase();let vis=0;
+  SVC_GROUPS.forEach(g=>{
+    let groupVis=0;
+    g.svcs.forEach(s=>{
+      const el=document.getElementById('sc-'+s.id);
+      const match=!q||s.name.toLowerCase().includes(lq)||g.group.toLowerCase().includes(lq)||s.id.toLowerCase().includes(lq);
+      if(el){el.classList.toggle('hidden',!!q&&!match);if(!q||match){vis++;groupVis++;}}
+    });
+    const grpEl=document.querySelector(`.svc-group[data-group="${g.group}"]`);
+    if(grpEl)grpEl.style.display=(q&&groupVis===0)?'none':'';
+  });
+  document.getElementById('svcCount').textContent=q?`${vis} of ${SVCS.length} services shown`:`${SVCS.length} services available`;
+}
+
+function togSvc(id){
+  if(ST.selected.has(id)){ST.selected.delete(id);document.getElementById('sc-'+id).classList.remove('sel')}
+  else{ST.selected.add(id);document.getElementById('sc-'+id).classList.add('sel')}
+}
+function selAll(){SVCS.forEach(s=>{ST.selected.add(s.id);document.getElementById('sc-'+s.id).classList.add('sel')})}
+function clrAll(){SVCS.forEach(s=>{ST.selected.delete(s.id);document.getElementById('sc-'+s.id).classList.remove('sel')})}
+
+async function startScan(){
+  if(!ST.regions.size){alert('Select at least one region');return}
+  if(!ST.selected.size){alert('Select at least one service');return}
+  showPanel('inv');
+  document.getElementById('statsRow').innerHTML='';
+  document.getElementById('invTables').innerHTML='';
+  document.getElementById('btnHtml').disabled=true;
+  document.getElementById('btnXlsx').disabled=true;
+  document.getElementById('invSearchWrap').style.display='none';
+  const sb=document.getElementById('scanBox');sb.style.display='block';
+  const fill=document.getElementById('scanFill');
+  const st=document.getElementById('scanSt');
+  const regions=[...ST.regions];
+  fill.style.width='5%';
+  let prog=10;
+  const t=setInterval(()=>{if(prog<85){prog+=0.6;fill.style.width=prog+'%'}},350);
+  try{
+    const mergedData={};
+    const globalScanned=new Set();
+    for(let ri=0;ri<regions.length;ri++){
+      const region=regions[ri];
+      st.textContent=`Scanning ${ST.selected.size} service(s) in ${region} (${ri+1}/${regions.length})...`;
+      const toScan=[...ST.selected].filter(svcId=>{
+        if(GLOBAL_SVCS.has(svcId)){if(globalScanned.has(svcId))return false;globalScanned.add(svcId);return true;}
+        return true;
+      });
+      const res=await fetch(`${apiBase()}/inventory`,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({accessKey:ST.ak,secretKey:ST.sk,region,services:toScan})});
+      const payload=await res.json();
+      if(!payload.success)throw new Error(payload.error||'Scan failed');
+      Object.entries(payload.data).forEach(([svcId,rows])=>{
+        if(!mergedData[svcId])mergedData[svcId]=[];
+        if(rows&&rows.length>0){
+          const isGlobal=GLOBAL_SVCS.has(svcId);
+          const withRegion=rows.map(r=>regions.length>1?{Region:isGlobal?'global':region,...r}:r);
+          mergedData[svcId].push(...withRegion);
+        }
+      });
+    }
+    clearInterval(t);fill.style.width='100%';st.textContent='Complete!';
+    ST.invData=mergedData;
+    setTimeout(()=>{sb.style.display='none';renderInventory()},400);
+  }catch(e){
+    clearInterval(t);sb.style.display='none';
+    document.getElementById('invTables').innerHTML=`<div class="inv-section"><div class="inv-hd inv-err"><div class="inv-title">❌ ${e.message}</div></div></div>`;
+  }
+}
+
+function renderInventory(){
+  const regionsArr=[...ST.regions];
+  const regionStr=regionsArr.join(', ');
+  const withResources=Object.entries(ST.invData).filter(([,rows])=>rows&&rows.length>0);
+  const total=withResources.reduce((a,[,rows])=>a+rows.length,0);
+  const svcCount=withResources.length;
+  document.getElementById('invSub').textContent=`${total} resources · ${svcCount} services · ${regionStr}`;
+  document.getElementById('statsRow').innerHTML=[
+    {v:svcCount,l:'Services Found',hi:false},{v:total,l:'Total Resources',hi:false},
+    {v:regionsArr.length>1?`${regionsArr.length} regions`:regionStr,l:'Region(s)',hi:false},
+    {v:ST.account,l:'Account ID',hi:false},{v:ST.accName||ST.account,l:'Account Name',hi:false},
+    ...withResources.map(([id,rows])=>{const svc=SVCS.find(s=>s.id===id);return{v:rows.length,l:svc?.name??id,hi:true}})
+  ].map(s=>`<div class="stat-card" style="${s.hi?'border-color:rgba(245,158,11,.2);background:var(--aglow)':'border-color:var(--b2)'}">
+    <div class="stat-v" style="font-size:${s.hi?'18px':'22px'}">${s.v}</div>
+    <div class="stat-l">${s.l}</div></div>`).join('');
+  const html=withResources.map(([id,rows])=>{
+    const svc=SVCS.find(s=>s.id===id);
+    const cols=Object.keys(rows[0]);
+    const thead=cols.map(c=>`<th>${c}</th>`).join('');
+    const tbody=rows.map(row=>`<tr data-search="${Object.values(row).join(' ').toLowerCase()}">${cols.map(c=>{
+      const v=row[c]??'N/A';const vs=String(v);let cell=vs;
+      const greens=['running','available','active','ACTIVE','enabled','Enabled','Deployed','OK','Yes','AVAILABLE','UP','InService'];
+      const reds=['stopped','terminated','inactive','INACTIVE','disabled','Disabled','failed','FAILED','No','ERROR','ALARM','DOWN','Stopped'];
+      if(greens.includes(vs))cell=`<span class="tag tg">${vs}</span>`;
+      else if(reds.includes(vs))cell=`<span class="tag tr">${vs}</span>`;
+      else if(/^(i-|vpc-|subnet-|sg-|vol-|ami-|snap-)/.test(vs))cell=`<span class="tag tb">${vs}</span>`;
+      else if(vs==='N/A'||vs==='None')cell=`<span class="tag tgr">${vs}</span>`;
+      return`<td title="${vs}">${cell}</td>`;
+    }).join('')}</tr>`).join('');
+    return`<div class="inv-section" data-svc="${id}"><div class="inv-hd"><div class="inv-title">${svc?.icon??'☁️'} ${svc?.name??id}<span class="inv-badge">${rows.length}</span></div></div><div class="tbl-wrap"><table class="inv-tbl"><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table></div></div>`;
+  }).join('');
+  document.getElementById('invTables').innerHTML=html||`<div style="text-align:center;padding:60px;color:var(--txt3)">No resources found</div>`;
+  document.getElementById('btnHtml').disabled=false;
+  document.getElementById('btnXlsx').disabled=false;
+  document.getElementById('invSearchWrap').style.display='block';
+}
+
+function filterInventory(q){
+  const lq=q.toLowerCase();
+  document.querySelectorAll('#invTables .inv-section').forEach(sec=>{
+    let hasVis=false;
+    sec.querySelectorAll('tbody tr').forEach(row=>{
+      const match=!lq||row.dataset.search.includes(lq);
+      row.style.display=match?'':'none';
+      if(match)hasVis=true;
+    });
+    sec.style.display=hasVis||!lq?'block':'none';
+  });
+}
+
+function showPanel(p){
+  document.getElementById('panelSvc').style.display=p==='svc'?'block':'none';
+  document.getElementById('panelInv').style.display=p==='inv'?'block':'none';
+}
+
+// ═══════════════════════════════════════════════════
+// ══ MODULE 2: COST OPTIMIZATION ══
+// ═══════════════════════════════════════════════════
+async function runCostReport(){
+  if(!ST.regions.size){alert('Select at least one region');return}
+  document.getElementById('costResults').innerHTML='';
+  document.getElementById('costXlsxBtn').disabled=true;
+  document.getElementById('costHtmlBtn').disabled=true;
+  const sb=document.getElementById('costScanBox');sb.style.display='block';
+  const fill=document.getElementById('costFill');
+  const st=document.getElementById('costSt');
+  let prog=5;const t=setInterval(()=>{if(prog<80){prog+=0.4;fill.style.width=prog+'%'}},400);
+  st.textContent='Fetching 3-month cost data from AWS Cost Explorer...';
+  try{
+    const r=await fetch(`${apiBase()}/cost/report`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({accessKey:ST.ak,secretKey:ST.sk,regions:[...ST.regions]})});
+    const d=await r.json();
+    clearInterval(t);fill.style.width='100%';st.textContent='Complete!';
+    if(!d.success)throw new Error(d.error||'Cost report failed');
+    ST.costData=d;
+    setTimeout(()=>{sb.style.display='none';renderCostReport(d)},400);
+  }catch(e){
+    clearInterval(t);sb.style.display='none';
+    document.getElementById('costResults').innerHTML=`<div class="inv-section"><div class="inv-hd inv-err"><div class="inv-title">❌ ${e.message}</div></div></div>`;
+  }
+}
+
+function renderCostReport(d){
+  const months=d.months||[];
+  const now=new Date().toLocaleString();
+  let html='';
+
+  // helper: cost table for any array
+  function costTable(rows){
+    if(!rows||!rows.length)return'<div class="no-results">None found</div>';
+    const cols=Object.keys(rows[0]);
+    let t=`<div class="tbl-wrap"><table class="inv-tbl cost-tbl"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+    rows.forEach(r=>{t+=`<tr>${cols.map(c=>{
+      const v=String(r[c]??'N/A');
+      if(c.includes('Savings')||c.includes('Cost'))return`<td><span class="tag tw">$${v}</span></td>`;
+      return`<td>${v}</td>`;}).join('')}</tr>`;});
+    return t+`</tbody></table></div>`;
+  }
+
+  // ── 0. Savings Summary (top card) ──────────────────────────────
+  const savings=d.savingsSummary||[];
+  if(savings.length>0){
+    const totalRow=savings.find(r=>r.Resource&&r.Resource.startsWith('TOTAL'));
+    const totalM=totalRow?totalRow['Monthly Savings ($)']:0;
+    const totalY=totalRow?totalRow['Yearly Savings ($)']:0;
+    html+=`<div class="cost-section" style="border:2px solid rgba(245,158,11,.4)">
+    <div class="cost-hd" style="background:linear-gradient(90deg,#1A3A6B,#243C72)">
+      💡 Potential Savings Summary
+      <span style="margin-left:auto;background:rgba(245,158,11,.25);color:#fbbf24;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700">
+        Total: $${Number(totalM).toFixed(2)}/mo · $${Number(totalY).toFixed(2)}/yr
+      </span>
+    </div>
+    <div class="tbl-wrap"><table class="inv-tbl cost-tbl">
+    <thead><tr><th>Unused Resource</th><th>Count</th><th>Monthly Savings ($)</th><th>Yearly Savings ($)</th><th>Note</th></tr></thead><tbody>`;
+    savings.forEach(r=>{
+      const isTotal=String(r.Resource||'').startsWith('TOTAL');
+      const bg=isTotal?'background:rgba(245,158,11,.08);font-weight:700':'';
+      html+=`<tr style="${bg}">
+        <td>${r.Resource}</td>
+        <td style="text-align:center">${r.Count||''}</td>
+        <td><span class="tag tw">$${Number(r['Monthly Savings ($)']).toFixed(2)}</span></td>
+        <td><span class="tag tw">$${Number(r['Yearly Savings ($)']).toFixed(2)}</span></td>
+        <td style="color:var(--txt2);font-size:11px">${r.Note||''}</td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div></div>`;
+  }
+
+  // ── 1. Monthly Cost by Service (3 months, no tax/support) ──────
+  const topSvcs=d.topServices||[];
+  if(topSvcs.length>0){
+    const lastM=months[months.length-1]||'';
+    const prevM=months[months.length-2]||'';
+    html+=`<div class="cost-section"><div class="cost-hd">📈 Service-wise Cost — Last 3 Months <span style="color:var(--txt2);font-size:10.5px;font-weight:400">(excl. Tax & Support)</span></div>
+    <div class="tbl-wrap"><table class="inv-tbl cost-tbl">
+    <thead><tr><th>Service</th>${months.map(m=>`<th>${m}</th>`).join('')}<th>Trend</th></tr></thead><tbody>`;
+    topSvcs.forEach((s,i)=>{
+      const last=s.monthly[lastM]||0;const prev=s.monthly[prevM]||0;
+      const diff=last-prev;const diffPct=prev>0?((diff/prev)*100).toFixed(1):'-';
+      const trendClass=diff<0?'cost-pos':'cost-neg';
+      const trendStr=diff<0?`▼ $${Math.abs(diff).toFixed(2)} (${diffPct}%)`:(diff>0?`▲ $${diff.toFixed(2)} (${diffPct}%)`:'—');
+      html+=`<tr><td>${s.service}</td>${months.map(m=>`<td>$${(s.monthly[m]||0).toFixed(2)}</td>`).join('')}<td class="${trendClass}">${trendStr}</td></tr>`;
+    });
+    html+=`</tbody></table></div></div>`;
+  }
+
+  // ── 2. Stopped EC2 Instances ────────────────────────────────────
+  const stopped=d.stoppedEC2||[];
+  html+=`<div class="cost-section"><div class="cost-hd">⛔ Stopped EC2 Instances <span class="inv-badge">${stopped.length}</span></div>`;
+  html+=costTable(stopped);html+=`</div>`;
+
+  // ── 3. Unattached EBS Volumes ───────────────────────────────────
+  const vols=d.unattachedVolumes||[];
+  html+=`<div class="cost-section"><div class="cost-hd">💾 Unattached EBS Volumes <span class="inv-badge">${vols.length}</span></div>`;
+  html+=costTable(vols);html+=`</div>`;
+
+  // ── 4. Unattached Elastic IPs ───────────────────────────────────
+  const eips=d.unattachedEIPs||[];
+  html+=`<div class="cost-section"><div class="cost-hd">🌐 Unattached Elastic IPs <span class="inv-badge">${eips.length}</span></div>`;
+  html+=costTable(eips);html+=`</div>`;
+
+  // ── 5. Old EBS Snapshots (>90 days) ────────────────────────────
+  const snaps=d.oldSnapshots||[];
+  html+=`<div class="cost-section"><div class="cost-hd">📸 Old EBS Snapshots (&gt;90 days) <span class="inv-badge">${snaps.length}</span></div>`;
+  html+=costTable(snaps);html+=`</div>`;
+
+  // ── 6. Old AMIs (>90 days) ──────────────────────────────────────
+  const amis=d.oldAMIs||[];
+  html+=`<div class="cost-section"><div class="cost-hd">💿 Old AMIs (&gt;90 days) <span class="inv-badge">${amis.length}</span></div>`;
+  html+=costTable(amis);html+=`</div>`;
+
+  document.getElementById('costResults').innerHTML=html;
+  document.getElementById('costXlsxBtn').disabled=false;
+  document.getElementById('costHtmlBtn').disabled=false;
+}
+
+// ═══════════════════════════════════════════════════
+// ══ MODULE 3: SECURITY AUDIT ══
+// ═══════════════════════════════════════════════════
+async function runSecurityScan(){
+  document.getElementById('secResults').innerHTML='';
+  document.getElementById('secXlsxBtn').disabled=true;
+  document.getElementById('secHtmlBtn').disabled=true;
+  const sb=document.getElementById('secScanBox');sb.style.display='block';
+  const fill=document.getElementById('secFill');
+  const st=document.getElementById('secSt');
+
+  // Progress ticker — scan runs 5-15 min with --services
+  let prog=2;
+  const t=setInterval(()=>{
+    if(prog<35){prog+=0.15;}
+    else if(prog<60){prog+=0.07;}
+    else if(prog<80){prog+=0.03;}
+    else if(prog<88){prog+=0.01;}
+    fill.style.width=prog+'%';
+  },1000);
+
+  // Elapsed time counter shown in status bar
+  let elapsedSec=0;
+  const elapsedTimer=setInterval(()=>{
+    elapsedSec++;
+    const m=Math.floor(elapsedSec/60), s=elapsedSec%60;
+    const eStr=m>0?`${m}m ${s}s`:`${s}s`;
+    const base=st.dataset.base||st.textContent.replace(/ \[\d.*$/,'');
+    st.dataset.base=base;
+    st.textContent=base+` [${eStr} elapsed]`;
+  },1000);
+
+  const showErr=(msg,detail)=>{
+    clearInterval(t);clearInterval(elapsedTimer);sb.style.display='none';
+    const detailHtml=detail?`<div style="margin-top:8px;font-size:11px;color:var(--txt3);white-space:pre-wrap;word-break:break-all">${detail}</div>`:'';
+    document.getElementById('secResults').innerHTML=
+      `<div class="inv-section"><div class="inv-hd inv-err"><div class="inv-title">❌ ${msg}</div></div>${detailHtml}</div>`;
+  };
+
+  const setSt=(msg)=>{st.dataset.base=msg;st.textContent=msg;};
+
+  try{
+    // ── Step 1: Check if Prowler is installed, auto-install if missing ──
+    setSt('Checking Prowler installation...');fill.style.width='3%';
+    const chk=await fetch(`${apiBase()}/security/check`,{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({install:false})});
+    const chkD=await chk.json();
+
+    if(!chkD.installed){
+      setSt('Prowler not found — auto-installing into virtual environment...');fill.style.width='5%';
+      const inst=await fetch(`${apiBase()}/security/check`,{method:'POST',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify({install:true})});
+      const instD=await inst.json();
+      if(!instD.installed){
+        showErr(
+          'Prowler is not installed',
+          'Please install it manually inside your virtual environment:\n\n' +
+          '  source venv/bin/activate\n' +
+          '  pip install prowler\n\n' +
+          '  Restart the server and try again.\n\n' +
+          (instD.error||'')
+        );
+        return;
+      }
+      setSt('Prowler installed successfully. Starting scan...');
+    } else {
+      setSt('Prowler found. Starting security scan (~5–15 minutes)...');
+    }
+
+    fill.style.width='8%';
+
+    // ── Step 2: Run Prowler scan ──
+    setSt('🔍 Starting Prowler scan — IAM, S3, EC2, RDS, CloudTrail and more...');
+
+    // Rotate status messages every 30s so user knows it's still running
+    const messages=[
+      '🔍 Scanning IAM: root usage, MFA, password policy, access keys...',
+      '🔍 Scanning S3: public access, encryption, versioning, transport...',
+      '🔍 Scanning EC2: security groups, IMDSv2, EBS encryption, public IPs...',
+      '🔍 Scanning RDS: public access, multi-AZ, storage encryption...',
+      '🔍 Scanning CloudTrail: multi-region, log validation, CloudWatch...',
+      '🔍 Scanning GuardDuty, Config, CloudWatch log retention...',
+      '🔍 Scanning KMS, Secrets Manager, ACM certificates...',
+      '🔍 Scanning VPC flow logs, default SGs, ELB, SQS, ECR...',
+      '🔍 Scanning Lambda, EKS endpoints...',
+      '⏳ Still running — scanning only your enabled AWS regions (faster than full scan)...',
+      '⏳ Finalising checks across all enabled regions...',
+      '⏳ Almost done — collecting findings and writing output files...',
+    ];
+    let msgIdx=0;
+    const msgTimer=setInterval(()=>{
+      if(msgIdx<messages.length){setSt(messages[msgIdx++]);}
+    },30000);
+
+    // 25-minute timeout — prowler with --services can take up to 15 min
+    const scanController=new AbortController();
+    const scanTimeout=setTimeout(()=>scanController.abort(),60*60*1000); // 60-min timeout
+    let runResp;
+    try{
+      runResp=await fetch(`${apiBase()}/security/run`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({accessKey:ST.ak,secretKey:ST.sk}),
+        signal:scanController.signal
+      });
+    }catch(fetchErr){
+      clearTimeout(scanTimeout);
+      if(fetchErr.name==='AbortError'){
+        showErr('Scan timed out after 60 minutes','The scan took too long. Try running prowler manually or check your network connection.');
+      } else { throw fetchErr; }
+      return;
+    }
+    clearTimeout(scanTimeout);
+    clearInterval(msgTimer);
+
+    const runD=await runResp.json();
+    if(!runD.success){
+      clearInterval(elapsedTimer);
+      showErr(runD.error||'Prowler scan failed', runD.detail||'');
+      return;
+    }
+
+    // ── Step 3: Format CSV results (also builds XLSX server-side) ──
+    prog=88;fill.style.width='88%';
+    setSt('Processing Prowler results & generating Excel report...');
+    const fmtResp=await fetch(`${apiBase()}/security/format`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({csvPath:runD.csvPath,
+        customerName:ST.accName||ST.account,
+        accountId:ST.account})});
+    const fmtD=await fmtResp.json();
+
+    clearInterval(t);clearInterval(elapsedTimer);
+    fill.style.width='100%';st.dataset.base='✅ Scan complete!';st.textContent='✅ Scan complete!';
+    if(!fmtD.success){showErr(fmtD.error||'Failed to parse results');return;}
+
+    ST.secData=fmtD;
+    setTimeout(()=>{sb.style.display='none';renderSecurityResults(fmtD)},600);
+
+  }catch(e){
+    clearInterval(elapsedTimer);
+    showErr(e.message||'Unexpected error',
+      e.message==='Failed to fetch'?'The server may have been restarted or lost connection. Please refresh and try again.':'');
+  }
+}
+
+function renderSecurityResults(d){
+  const summary=d.summary||[];
+  const now=new Date().toLocaleString();
+
+  // ── Severity colour helper ──
+  const SEV={
+    critical:{bg:'#C62828',fg:'#fff',label:'CRITICAL'},
+    high:    {bg:'#EF6C00',fg:'#fff',label:'HIGH'},
+    medium:  {bg:'#F9A825',fg:'#000',label:'MEDIUM'},
+    low:     {bg:'#2E7D32',fg:'#fff',label:'LOW'},
+    informational:{bg:'#1565C0',fg:'#fff',label:'INFO'},
+  };
+  function sevBadge(s){
+    const k=(s||'').toLowerCase();
+    const c=SEV[k]||{bg:'#475569',fg:'#fff',label:(s||'N/A').toUpperCase()};
+    return`<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:${c.bg};color:${c.fg};font-family:var(--mono)">${c.label}</span>`;
+  }
+
+  // ── Severity count summary ──
+  const sevCounts={critical:0,high:0,medium:0,low:0,informational:0};
+  summary.forEach(s=>s.checks.forEach(c=>{
+    const k=(c.SEVERITY||'').toLowerCase();
+    if(sevCounts[k]!==undefined)sevCounts[k]++;
+  }));
+
+  let html=`
+  <!-- Stats bar -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px">
+    <div class="stat-card" style="border-color:var(--b2)"><div class="stat-v">${d.totalFails||0}</div><div class="stat-l">Total Failures</div></div>
+    <div class="stat-card" style="border-color:var(--b2)"><div class="stat-v">${d.totalServices||0}</div><div class="stat-l">Services Affected</div></div>
+    <div class="stat-card" style="border-color:#C62828;background:rgba(198,40,40,.07)"><div class="stat-v" style="color:#ef4444">${sevCounts.critical}</div><div class="stat-l">Critical</div></div>
+    <div class="stat-card" style="border-color:#EF6C00;background:rgba(239,108,0,.07)"><div class="stat-v" style="color:#f97316">${sevCounts.high}</div><div class="stat-l">High</div></div>
+    <div class="stat-card" style="border-color:#F9A825;background:rgba(249,168,37,.07)"><div class="stat-v" style="color:#f59e0b">${sevCounts.medium}</div><div class="stat-l">Medium</div></div>
+    <div class="stat-card" style="border-color:#2E7D32;background:rgba(46,125,50,.07)"><div class="stat-v" style="color:#10b981">${sevCounts.low}</div><div class="stat-l">Low</div></div>
+  </div>
+
+  <!-- Summary table -->
+  <div class="inv-section" style="margin-bottom:20px">
+    <div class="inv-hd"><div class="inv-title">📋 Summary — Failures by Service</div></div>
+    <div class="tbl-wrap"><table class="inv-tbl">
+      <thead><tr><th style="min-width:160px">Service</th><th>Check Title</th><th style="min-width:110px">Severity</th></tr></thead>
+      <tbody>`;
+  summary.forEach(svc=>{
+    svc.checks.forEach((chk,i)=>{
+      html+=`<tr>
+        <td style="font-weight:${i===0?'600':'400'};color:${i===0?'var(--acc)':'var(--txt3)'}">${i===0?svc.service:''}</td>
+        <td>${chk.CHECK_TITLE||'N/A'}</td>
+        <td>${sevBadge(chk.SEVERITY)}</td>
+      </tr>`;
+    });
+  });
+  html+=`</tbody></table></div></div>
+
+  <!-- Per-service accordion panels -->
+  <div style="margin-bottom:8px;font-size:11px;color:var(--txt3)">Click a service button to expand its failure details:</div>
+  <div id="secAccordion">`;
+
+  const details=d.details||{};
+  const svcHdrColours=['#1A3A6B','#243C72','#1C3560','#2A4880','#16305A','#0F2850','#2E4A7A','#1F3A5F'];
+
+  summary.forEach((item,idx)=>{
+    const svc=item.service;
+    const rows=details[svc]||[];
+    if(!rows.length)return;
+    const colour=svcHdrColours[idx%svcHdrColours.length];
+    const panelId=`secPanel_${idx}`;
+    const cols=rows.length>0?Object.keys(rows[0]):[];
+
+    const tbody=rows.map((r,ri)=>`<tr>${cols.map(c=>{
+      const v=String(r[c]??'N/A');
+      if(c==='SEVERITY')return`<td>${sevBadge(v)}</td>`;
+      if(c==='STATUS')return`<td><span class="tag tr" style="font-family:var(--mono);font-size:10px">${v}</span></td>`;
+      if(c==='STATUS_EXTENDED')return`<td style="max-width:300px;white-space:normal;word-break:break-word;font-size:10.5px" title="${v}">${v}</td>`;
+      return`<td title="${v}">${v}</td>`;
+    }).join('')}</tr>`).join('');
+
+    html+=`
+    <div class="sec-accordion-item" style="margin-bottom:8px;border-radius:9px;overflow:hidden;border:1px solid var(--b1)">
+      <button onclick="toggleSecPanel('${panelId}')"
+        style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 16px;
+               background:${colour};color:#fff;border:none;cursor:pointer;text-align:left;
+               font-family:var(--fn);font-size:13px;font-weight:700;border-radius:0">
+        <span style="font-size:15px">🔒</span>
+        <span>${svc}</span>
+        <span style="margin-left:8px;background:rgba(245,158,11,.3);border:1px solid rgba(245,158,11,.6);
+               color:#fbbf24;font-size:10.5px;padding:2px 8px;border-radius:20px;font-family:var(--mono)">${rows.length} failures</span>
+        ${sevBadge(item.checks[0]?.SEVERITY||'')}
+        <span id="${panelId}_arrow" style="margin-left:auto;font-size:16px;transition:transform .2s">▼</span>
+      </button>
+      <div id="${panelId}" style="display:none;overflow-x:auto">
+        <table class="inv-tbl" style="border-radius:0">
+          <thead><tr>${cols.map(c=>`<th>${c.replace(/_/g,' ')}</th>`).join('')}</tr></thead>
+          <tbody>${tbody}</tbody>
+        </table>
+      </div>
+    </div>`;
+  });
+
+  html+=`</div>`; // end secAccordion
+  document.getElementById('secResults').innerHTML=html;
+  document.getElementById('secXlsxBtn').disabled=false;
+  document.getElementById('secHtmlBtn').disabled=false;
+}
+
+function toggleSecPanel(id){
+  const el=document.getElementById(id);
+  const arrow=document.getElementById(id+'_arrow');
+  if(!el)return;
+  const open=el.style.display==='none';
+  el.style.display=open?'block':'none';
+  if(arrow)arrow.style.transform=open?'rotate(180deg)':'rotate(0deg)';
+}
+
+// ═══════════════════════════════════════════════════
+// ══ MODULE 4: MONTHLY REPORT ══
+// ═══════════════════════════════════════════════════
+async function runMonthlyReport(){
+  if(!ST.regions.size){alert('Select at least one region');return}
+  document.getElementById('monthlyResults').innerHTML='';
+  document.getElementById('monthlyXlsxBtn').disabled=true;
+  document.getElementById('monthlyDocxBtn').disabled=true;
+  const sb=document.getElementById('monthlyScanBox');sb.style.display='block';
+  const fill=document.getElementById('monthlyFill');
+  const st=document.getElementById('monthlySt');
+  let prog=5;const t=setInterval(()=>{if(prog<80){prog+=0.5;fill.style.width=prog+'%'}},300);
+  try{
+    const r=await fetch(`${apiBase()}/monthly/report`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({accessKey:ST.ak,secretKey:ST.sk,regions:[...ST.regions]})});
+    const d=await r.json();
+    clearInterval(t);fill.style.width='100%';st.textContent='Complete!';
+    if(!d.success)throw new Error(d.error||'Monthly report failed');
+    ST.monthlyData=d;
+    setTimeout(()=>{sb.style.display='none';renderMonthlyReport(d)},400);
+  }catch(e){
+    clearInterval(t);sb.style.display='none';
+    document.getElementById('monthlyResults').innerHTML=`<div class="inv-section"><div class="inv-hd inv-err"><div class="inv-title">❌ ${e.message}</div></div></div>`;
+  }
+}
+
+function renderMonthlyReport(d){
+  const months=d.billingMonths||[];
+  const billing=d.billing||{};
+  let html='';
+
+  const m0=months[0]||'',m1=months[1]||'';
+
+  // ── Cover stats ──────────────────────────────────────────────────
+  let tot0=0,tot1=0;
+  Object.values(billing).forEach(m=>{tot0+=m[m0]||0;tot1+=m[m1]||0;});
+  const totalDiff=tot1-tot0;
+  const totalCls=totalDiff<0?'cost-pos':'cost-neg';
+  html+=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+    ${[
+      [`$${tot0.toFixed(2)}`, `${m0} Total`],
+      [`$${tot1.toFixed(2)}`, `${m1} Total`],
+      [`${totalDiff>=0?'+':''}$${totalDiff.toFixed(2)}`, 'Difference'],
+    ].map(([v,l])=>`<div style="background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:14px 18px">
+      <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--acc)">${v}</div>
+      <div style="font-size:11px;color:var(--txt2);margin-top:3px">${l}</div>
+    </div>`).join('')}
+  </div>`;
+
+  // ── Top 5 Billing comparison ─────────────────────────────────────
+  const sortedBilling=Object.entries(billing).sort((a,b)=>(b[1][m1]||0)-(a[1][m1]||0));
+  html+=`<div class="cost-section"><div class="cost-hd">💳 Top 5 Services — ${m0} vs ${m1} <span style="color:var(--txt2);font-size:10.5px;font-weight:400">(excl. Tax & Support)</span></div>
+  <div class="tbl-wrap"><table class="inv-tbl cost-tbl">
+  <thead><tr><th>Service</th><th>${m0||'Month-1'} ($)</th><th>${m1||'Month-2'} ($)</th><th>Difference ($)</th><th>Change (%)</th></tr></thead><tbody>`;
+  sortedBilling.forEach(([svc,monthly])=>{
+    const c0=monthly[m0]||0,c1=monthly[m1]||0;
+    if(c0<0.01&&c1<0.01)return;
+    const diff=c1-c0;const pct=c0>0?((diff/c0)*100).toFixed(1):'-';
+    const cls=diff<0?'cost-pos':'cost-neg';
+    html+=`<tr><td>${svc}</td><td>$${c0.toFixed(2)}</td><td>$${c1.toFixed(2)}</td>
+      <td class="${cls}">${diff>=0?'+':''}$${Math.abs(diff).toFixed(2)}</td>
+      <td class="${cls}">${pct!=='-'?(diff>=0?'+':'')+pct+'%':'-'}</td></tr>`;
+  });
+  html+=`<tr style="font-weight:700;background:var(--s2)"><td>TOTAL (Top 5)</td><td>$${tot0.toFixed(2)}</td><td>$${tot1.toFixed(2)}</td>
+    <td class="${totalCls}">${totalDiff>=0?'+':''}$${Math.abs(totalDiff).toFixed(2)}</td>
+    <td class="${totalCls}">${tot0>0?((totalDiff/tot0)*100).toFixed(1)+'%':'-'}</td></tr>`;
+  html+=`</tbody></table></div></div>`;
+
+  // ── EC2 Utilization ──────────────────────────────────────────────
+  const ec2=d.ec2Utilization||[];
+  html+=`<div class="cost-section"><div class="cost-hd">🖥️ EC2 Instance Utilization — Last 30 Days <span class="inv-badge">${ec2.length}</span></div>`;
+  if(ec2.length>0){
+    const cols=Object.keys(ec2[0]);
+    html+=`<div class="tbl-wrap"><table class="inv-tbl"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+    ec2.forEach(r=>{html+=`<tr>${cols.map(c=>{const v=r[c]??'N/A';const vs=String(v);
+      if(c.includes('CPU')&&vs!=='N/A'){
+        const n=parseFloat(vs);const cls=n>80?'util-bad':n>50?'util-warn':'util-good';
+        return`<td class="${cls}">${vs}%</td>`;}
+      return`<td>${vs}</td>`;}).join('')}</tr>`;});
+    html+=`</tbody></table></div>
+    <div style="padding:8px 14px;font-size:11px;color:var(--txt2)">* Memory and Disk metrics require CloudWatch Agent on instances</div>`;
+  } else html+=`<div class="no-results">No running EC2 instances found in selected regions</div>`;
+  html+=`</div>`;
+
+  // ── RDS Utilization ──────────────────────────────────────────────
+  const rds=d.rdsUtilization||[];
+  html+=`<div class="cost-section"><div class="cost-hd">🗄️ RDS Utilization — Last 30 Days <span class="inv-badge">${rds.length}</span></div>`;
+  if(rds.length>0){
+    const cols=Object.keys(rds[0]);
+    html+=`<div class="tbl-wrap"><table class="inv-tbl"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+    rds.forEach(r=>{html+=`<tr>${cols.map(c=>{const v=r[c]??'N/A';const vs=String(v);
+      if(c.includes('CPU')&&vs!=='N/A*'){
+        const n=parseFloat(vs);const cls=n>80?'util-bad':n>50?'util-warn':'util-good';
+        return`<td class="${cls}">${vs}%</td>`;}
+      return`<td>${vs}</td>`;}).join('')}</tr>`;});
+    html+=`</tbody></table></div>`;
+  } else html+=`<div class="no-results">No RDS instances found in selected regions</div>`;
+  html+=`</div>`;
+
+  document.getElementById('monthlyResults').innerHTML=html;
+  document.getElementById('monthlyXlsxBtn').disabled=false;
+  document.getElementById('monthlyDocxBtn').disabled=false;
+}
+
+// ═══════════════════════════════════════════════════
+// EXPORT FUNCTIONS
+// ═══════════════════════════════════════════════════
+let pendingType='',pendingMod='';
+function openExport(type,mod){
+  mod=mod||'inventory';
+  pendingType=type;pendingMod=mod;
+  document.getElementById('exportSub').textContent=`Export ${type.toUpperCase()} · ${mod} · Account ${ST.account}`;
+  document.getElementById('custName').value='';
+  document.getElementById('exportOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('custName').focus(),100);
+}
+function closeModal(){document.getElementById('exportOverlay').classList.remove('open')}
+function confirmExport(){
+  const n=document.getElementById('custName').value.trim();
+  if(!n){document.getElementById('custName').style.borderColor='var(--red)';return}
+  document.getElementById('custName').style.borderColor='';
+  closeModal();
+  if(pendingType==='xlsx'){
+    if(pendingMod==='inventory')exportXLSX(n);
+    else if(pendingMod==='cost')exportCostXLSXNamed(n);
+    else if(pendingMod==='security')exportSecXLSXNamed(n);
+    else if(pendingMod==='monthly')exportMonthlyXLSXNamed(n);
+  } else if(pendingType==='docx'){
+    if(pendingMod==='monthly')exportMonthlyDOCXNamed(n);
+  } else {
+    if(pendingMod==='inventory')exportHTML(n);
+    else if(pendingMod==='cost')exportCostHTMLNamed(n);
+    else if(pendingMod==='security')exportSecHTMLNamed(n);
+  }
+}
+
+// ── Inventory shortcuts ──
+function exportXLSX(cName){_exportInvXLSX(cName||'Report')}
+function exportHTML(cName){_exportInvHTML(cName||'Report')}
+
+// ── Cost shortcuts ──
+function exportCostXLSX(){openExport('xlsx','cost')}
+function exportCostHTML(){openExport('html','cost')}
+function exportCostXLSXNamed(n){if(ST.costData)_exportCostXLSX(n,ST.costData)}
+function exportCostHTMLNamed(n){if(ST.costData)_exportCostHTML(n,ST.costData)}
+
+// ── Security shortcuts ──
+function exportSecXLSX(){openExport('xlsx','security')}
+function exportSecHTML(){openExport('html','security')}
+function exportSecXLSXNamed(n){if(ST.secData)_exportSecXLSX(n,ST.secData)}
+function exportSecHTMLNamed(n){if(ST.secData)_exportSecHTML(n,ST.secData)}
+
+// ── Monthly shortcuts ──
+function exportMonthlyXLSX(){openExport('xlsx','monthly')}
+function exportMonthlyXLSXNamed(n){if(ST.monthlyData)_exportMonthlyXLSX(n,ST.monthlyData)}
+function exportMonthlyDOCXNamed(n){if(ST.monthlyData)_exportMonthlyDOCX(n,ST.monthlyData)}
+
+// ─── XLSX Helpers ───
+function mkBorder(){const b={style:'thin',color:{rgb:'FFB0BEC5'}};return{top:b,bottom:b,left:b,right:b}}
+function mkHdr(bg){return{font:{bold:true,sz:11,color:{rgb:'FFFFFFFF'}},fill:{patternType:'solid',fgColor:{rgb:bg||'FF1A3A6B'}},alignment:{horizontal:'center',vertical:'center'},border:mkBorder()}}
+function mkRow(odd){return{font:{sz:10,color:{rgb:'FF1E293B'}},fill:{patternType:'solid',fgColor:{rgb:odd?'FFFFFFFF':'FFF0F4F8'}},alignment:{horizontal:'left',vertical:'center'},border:mkBorder()}}
+function mkNum(odd){return{font:{sz:10,color:{rgb:'FF1E293B'}},fill:{patternType:'solid',fgColor:{rgb:odd?'FFFFFFFF':'FFF0F4F8'}},alignment:{horizontal:'right',vertical:'center'},border:mkBorder()}}
+function mkLabel(){return{font:{bold:true,sz:10,color:{rgb:'FFAEC9F0'}},fill:{patternType:'solid',fgColor:{rgb:'FF0D1A2D'}},alignment:{horizontal:'left',vertical:'center'},border:mkBorder()}}
+function mkValue(){return{font:{sz:10,color:{rgb:'FFE2E8F0'}},fill:{patternType:'solid',fgColor:{rgb:'FF112238'}},alignment:{horizontal:'left',vertical:'center'},border:mkBorder()}}
+function setCell(ws,r,c,v,s){const addr=XLSX.utils.encode_cell({r,c});const t=typeof v==='number'?'n':'s';ws[addr]={v,t,s}}
+function addTableSheet(wb,shName,rows,hdrBg){
+  if(!rows||rows.length===0)return;
+  const cols=Object.keys(rows[0]);const ws={};
+  const sr={s:{r:0,c:0},e:{r:rows.length,c:cols.length-1}};
+  cols.forEach((c,ci)=>{setCell(ws,0,ci,c,mkHdr(hdrBg||'FF1A3A6B'))});
+  rows.forEach((row,ri)=>{
+    const odd=ri%2===0;
+    cols.forEach((c,ci)=>{
+      let v=row[c];if(v===null||v===undefined)v='';
+      const isN=typeof v==='number';if(!isN)v=String(v);
+      setCell(ws,ri+1,ci,v,isN?mkNum(odd):mkRow(odd));
+    });
+  });
+  ws['!ref']=XLSX.utils.encode_range(sr);
+  ws['!cols']=cols.map(()=>({wch:22}));
+  XLSX.utils.book_append_sheet(wb,ws,shName.substring(0,31));
+}
+function addSummaryInfo(ws,info,startR){
+  info.forEach(([k,v],i)=>{setCell(ws,startR+i,0,k,mkLabel());setCell(ws,startR+i,1,v,mkValue())})
+  return startR+info.length;
+}
+
+// ─── Inventory XLSX ───
+function _exportInvXLSX(cName){
+  try{
+    if(typeof XLSX==='undefined'){alert('SheetJS not loaded');return}
+    const wb=XLSX.utils.book_new();
+    const withRes=Object.entries(ST.invData).filter(([,r])=>r&&r.length>0);
+    const total=withRes.reduce((a,[,r])=>a+r.length,0);
+    const now=new Date().toLocaleString();
+    // Summary
+    const ws={};const range={s:{r:0,c:0},e:{r:0,c:1}};
+    setCell(ws,0,0,'AWS Cloud Inventory Report',{font:{bold:true,sz:14,color:{rgb:'FFFFFFFF'}},fill:{patternType:'solid',fgColor:{rgb:'FF0C1929'}},alignment:{horizontal:'left'},border:mkBorder()});
+    setCell(ws,0,1,'',{fill:{patternType:'solid',fgColor:{rgb:'FF0C1929'}},border:mkBorder()});
+    const info=[['Customer',cName],['Account ID',ST.account],['Account Name',ST.accName||ST.account],['IAM ARN',ST.arn],['Region(s)',[...ST.regions].join(', ')],['Report Date',now],['Total Resources',total]];
+    info.forEach(([k,v],i)=>{setCell(ws,i+2,0,k,mkLabel());setCell(ws,i+2,1,v,mkValue());range.e.r=i+2});
+    const hR=info.length+3;
+    setCell(ws,hR,0,'Service',mkHdr());setCell(ws,hR,1,'Count',mkHdr());range.e.r=hR;
+    withRes.forEach(([id,rows],i)=>{const svc=SVCS.find(s=>s.id===id);setCell(ws,hR+1+i,0,svc?svc.name:id,mkRow(i%2===0));setCell(ws,hR+1+i,1,rows.length,mkNum(i%2===0));range.e.r=hR+1+i});
+    ws['!ref']=XLSX.utils.encode_range(range);ws['!cols']=[{wch:36},{wch:22}];ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:1}}];
+    XLSX.utils.book_append_sheet(wb,ws,'Summary');
+    const HDR=['FF1A3A6B','FF243C72','FF1C3560','FF2A4880','FF16305A','FF0F2850','FF2E4A7A','FF1F3A5F'];
+    withRes.forEach(([id,rows],idx)=>{const svc=SVCS.find(s=>s.id===id);addTableSheet(wb,(svc?svc.name:id),rows,HDR[idx%HDR.length])});
+    XLSX.writeFile(wb,`${cName.replace(/[^a-zA-Z0-9_-]/g,'_')}_${ST.account}_inventory.xlsx`);
+  }catch(err){alert('Excel error: '+err.message)}
+}
+
+// ─── Inventory HTML ───
+function _exportInvHTML(cName){
+  const withRes=Object.entries(ST.invData).filter(([,rows])=>rows&&rows.length>0);
+  const total=withRes.reduce((a,[,rows])=>a+rows.length,0);
+  const now=new Date().toLocaleString();
+  const tables=withRes.map(([id,rows])=>{
+    const svc=SVCS.find(s=>s.id===id);
+    const cols=Object.keys(rows[0]);
+    const thead=cols.map(c=>`<th>${c}</th>`).join('');
+    const tbody=rows.map((row,i)=>`<tr class="${i%2===0?'ev':'od'}">${cols.map(c=>{
+      const v=row[c]??'N/A';const vs=String(v);
+      const g=['running','available','active','ACTIVE','Enabled','enabled','Yes','OK'];
+      const r=['stopped','terminated','INACTIVE','Disabled','disabled','No','ALARM','failed'];
+      if(g.includes(vs))return`<td><span class="tag-g">${vs}</span></td>`;
+      if(r.includes(vs))return`<td><span class="tag-r">${vs}</span></td>`;
+      return`<td>${vs}</td>`;}).join('')}</tr>`).join('');
+    return`<div class="svc-block"><div class="svc-hd"><span>${svc?.icon??'☁️'}</span><span>${svc?.name??id}</span><span class="cnt">${rows.length}</span></div>
+    <div class="tblw"><table><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table></div></div>`;
+  }).join('');
+  const blob=new Blob([`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>AWS Inventory — ${cName}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:#f0f4f8;color:#1e293b}
+  .banner{background:linear-gradient(135deg,#0c1929,#1a3a6b);padding:32px 48px;color:#fff}
+  .b-title{font-size:24px;font-weight:700}.b-sub{color:rgba(255,255,255,.6);font-size:13px;margin-top:4px}
+  .svc-block{background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin:16px 48px;overflow:hidden}
+  .svc-hd{display:flex;align-items:center;gap:9px;padding:11px 16px;background:#1a3a6b;color:#fff;font-size:13px;font-weight:700}
+  .cnt{margin-left:auto;background:rgba(245,158,11,.3);color:#f59e0b;font-size:10.5px;padding:2px 8px;border-radius:20px}
+  .tblw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:11.5px;white-space:nowrap}
+  thead th{padding:8px 12px;text-align:left;background:#243c72;color:#fff;font-size:10px;text-transform:uppercase;border:1px solid #1a2e55}
+  td{padding:7px 12px;border:1px solid #e2e8f0;color:#374151}
+  tr.ev td{background:#f8fafd}tr.od td{background:#fff}tr:hover td{background:#eff6ff}
+  .tag-g{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;padding:1px 6px;border-radius:4px;font-size:10.5px}
+  .tag-r{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:1px 6px;border-radius:4px;font-size:10.5px}
+  </style></head><body>
+  <div class="banner"><div class="b-title">AWS Cloud Inventory — ${cName}</div>
+  <div class="b-sub">Account: ${ST.account} · ${total} resources · Generated: ${now}</div></div>
+  ${tables}</body></html>`],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`${cName.replace(/[^a-zA-Z0-9_-]/g,'_')}_${ST.account}_inventory.html`;a.click();
+}
+
+// ─── Cost XLSX ───
+function _exportCostXLSX(cName,d){
+  if(typeof XLSX==='undefined'){alert('SheetJS not loaded');return}
+  const wb=XLSX.utils.book_new();
+  const months=d.months||[];
+  const now=new Date().toLocaleString();
+  // Bill summary sheet
+  const topSvcs=d.topServices||[];
+  const ws={};const cols=['Service',...months,'Trend ($)'];
+  let r=0;
+  cols.forEach((c,ci)=>setCell(ws,r,ci,c,mkHdr()));r++;
+  topSvcs.forEach((s,i)=>{
+    const last=s.monthly[months[months.length-1]]||0;
+    const prev=s.monthly[months[months.length-2]]||0;
+    const diff=last-prev;const odd=i%2===0;
+    setCell(ws,r,0,s.service,mkRow(odd));
+    months.forEach((m,mi)=>setCell(ws,r,mi+1,s.monthly[m]||0,mkNum(odd)));
+    setCell(ws,r,months.length+1,parseFloat(diff.toFixed(4)),mkNum(odd));
+    r++;
+  });
+  ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:r-1,c:cols.length-1}});
+  ws['!cols']=[{wch:36},...months.map(()=>({wch:14})),{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws,'Monthly Cost Summary');
+  addTableSheet(wb,'Stopped EC2',d.stoppedEC2||[]);
+  addTableSheet(wb,'Unattached Volumes',d.unattachedVolumes||[]);
+  addTableSheet(wb,'Unattached EIPs',d.unattachedEIPs||[]);
+  addTableSheet(wb,'Old Snapshots (90d)',d.oldSnapshots||[]);
+  addTableSheet(wb,'Old AMIs (90d)',d.oldAMIs||[]);
+  addTableSheet(wb,'Savings Summary',d.savingsSummary||[]);
+  XLSX.writeFile(wb,`${cName.replace(/[^a-zA-Z0-9_-]/g,'_')}_${ST.account}_cost_optimization.xlsx`);
+}
+
+// ─── Cost HTML ───
+function _exportCostHTML(cName,d){
+  const content=document.getElementById('costResults').innerHTML;
+  const blob=new Blob([`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cost Report — ${cName}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:#f0f4f8;color:#1e293b}
+  .banner{background:linear-gradient(135deg,#0c1929,#1a3a6b);padding:32px 48px;color:#fff;margin-bottom:24px}
+  .b-title{font-size:24px;font-weight:700}.b-sub{color:rgba(255,255,255,.6)}
+  .cost-section{background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin:0 48px 20px;overflow:hidden}
+  .cost-hd{padding:12px 16px;background:#1a3a6b;color:#fff;font-size:13px;font-weight:700}
+  .tbl-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:11.5px}
+  th{padding:8px 12px;background:#243c72;color:#fff;text-align:left;border:1px solid #1a2e55}
+  td{padding:7px 12px;border:1px solid #e2e8f0;color:#374151}
+  tr:nth-child(even) td{background:#f8fafd}tr:hover td{background:#eff6ff}
+  .inv-badge{background:rgba(245,158,11,.2);color:#b45309;padding:2px 8px;border-radius:20px;font-size:10.5px}
+  .tag{padding:1px 6px;border-radius:4px;font-size:10.5px}
+  .tw{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+  .cost-pos{color:#065f46}.cost-neg{color:#991b1b}
+  .no-results{padding:18px;color:#94a3b8;font-style:italic;text-align:center}
+  </style></head><body>
+  <div class="banner"><div class="b-title">💰 Cost Optimization Report — ${cName}</div>
+  <div class="b-sub">Account: ${ST.account} · Generated: ${new Date().toLocaleString()}</div></div>
+  <div style="padding:0 48px">${content.replace(/var\(--[^)]+\)/g,'#e2e8f0').replace(/class="cost-section"/g,'class="cost-section"')}</div>
+  </body></html>`],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`${cName.replace(/[^a-zA-Z0-9_-]/g,'_')}_${ST.account}_cost_report.html`;a.click();
+}
+
+// ─── Security XLSX — download server-generated file ───
+async function _exportSecXLSX(cName,d){
+  if(!d.xlsxPath){alert('XLSX not ready. Please re-run the scan.');return;}
+  try{
+    const resp=await fetch(`${apiBase()}/security/download_xlsx`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({xlsxPath:d.xlsxPath,
+        customerName:cName,accountId:ST.account})});
+    if(!resp.ok){const e=await resp.json();alert('Download error: '+(e.error||resp.status));return;}
+    const blob=await resp.blob();
+    const fn=`${cName.replace(/[^a-zA-Z0-9_-]/g,'_')}_${ST.account}_security_audit.xlsx`;
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;a.click();
+    URL.revokeObjectURL(a.href);
+  }catch(e){alert('Download failed: '+e.message);}
+}
+
+// ─── Security HTML — full standalone with accordion ───
+function _exportSecHTML(cName,d){
+  const summary=d.summary||[];
+  const details=d.details||{};
+  const now=new Date().toLocaleString();
+  const SEV={
+    critical:{bg:'#C62828',fg:'#fff'},high:{bg:'#EF6C00',fg:'#fff'},
+    medium:{bg:'#F9A825',fg:'#000'},low:{bg:'#2E7D32',fg:'#fff'},
+    informational:{bg:'#1565C0',fg:'#fff'},
+  };
+  function sevBadge(s){
+    const k=(s||'').toLowerCase();const c=SEV[k]||{bg:'#475569',fg:'#fff'};
+    return`<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:${c.bg};color:${c.fg}">${(s||'N/A').toUpperCase()}</span>`;
+  }
+  const sevCounts={critical:0,high:0,medium:0,low:0,informational:0};
+  summary.forEach(s=>s.checks.forEach(c=>{const k=(c.SEVERITY||'').toLowerCase();if(sevCounts[k]!==undefined)sevCounts[k]++;}));
+  const svcHdrColours=['#1A3A6B','#243C72','#1C3560','#2A4880','#16305A','#0F2850','#2E4A7A','#1F3A5F'];
+
+  // Summary table rows
+  let summaryRows='';
+  summary.forEach(svc=>{
+    svc.checks.forEach((chk,i)=>{
+      summaryRows+=`<tr>
+        <td style="font-weight:${i===0?600:400};color:${i===0?'#f59e0b':'#94a3b8'}">${i===0?svc.service:''}</td>
+        <td>${chk.CHECK_TITLE||'N/A'}</td>
+        <td>${sevBadge(chk.SEVERITY)}</td>
+      </tr>`;
+    });
+  });
+
+  // Accordion panels
+  let accordionHtml='';
+  summary.forEach((item,idx)=>{
+    const svc=item.service;const rows=details[svc]||[];if(!rows.length)return;
+    const colour=svcHdrColours[idx%svcHdrColours.length];
+    const panelId=`p${idx}`;
+    const cols=rows.length?Object.keys(rows[0]):[];
+    const tbody=rows.map(r=>`<tr>${cols.map(c=>{
+      const v=String(r[c]??'');
+      if(c==='SEVERITY')return`<td>${sevBadge(v)}</td>`;
+      if(c==='STATUS')return`<td><span style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:1px 6px;border-radius:4px;font-size:10px">${v}</span></td>`;
+      if(c==='STATUS_EXTENDED')return`<td style="max-width:300px;white-space:normal;word-break:break-word;font-size:10.5px">${v}</td>`;
+      return`<td title="${v}">${v}</td>`;
+    }).join('')}</tr>`).join('');
+    accordionHtml+=`
+    <div style="margin-bottom:8px;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0">
+      <button onclick="var p=document.getElementById('${panelId}');var a=document.getElementById('${panelId}a');p.style.display=p.style.display==='none'?'block':'none';a.textContent=p.style.display==='none'?'▼':'▲'"
+        style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 16px;
+               background:${colour};color:#fff;border:none;cursor:pointer;
+               font-family:'Inter',sans-serif;font-size:13px;font-weight:700;text-align:left">
+        <span>🔒</span><span>${svc}</span>
+        <span style="background:rgba(245,158,11,.3);border:1px solid rgba(245,158,11,.6);color:#fbbf24;font-size:10.5px;padding:2px 8px;border-radius:20px">${rows.length} failures</span>
+        ${sevBadge(item.checks[0]?.SEVERITY||'')}
+        <span id="${panelId}a" style="margin-left:auto;font-size:16px">▼</span>
+      </button>
+      <div id="${panelId}" style="display:none;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:11.5px;white-space:nowrap">
+          <thead><tr>${cols.map(c=>`<th style="padding:8px 12px;background:#243c72;color:#fff;text-align:left;border:1px solid #1a2e55;font-size:10px;text-transform:uppercase">${c.replace(/_/g,' ')}</th>`).join('')}</tr></thead>
+          <tbody>${tbody}</tbody>
+        </table>
+      </div>
+    </div>`;
+  });
+
+  const html=`<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Security Audit — ${cName} — ${ST.account}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f0f4f8;color:#1e293b}
+.banner{background:linear-gradient(135deg,#0c1929 0%,#1a3a6b 60%,#243c72 100%);padding:32px 48px;color:#fff}
+.banner-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.b-title{font-size:26px;font-weight:700;margin-bottom:3px}.b-sub{color:rgba(255,255,255,.6);font-size:13px}
+.metas{display:flex;flex-wrap:wrap;gap:24px}
+.meta label{font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.4);display:block;margin-bottom:2px}
+.meta span{font-family:'JetBrains Mono',monospace;font-size:12px;color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;padding:20px 48px;background:#fff;border-bottom:1px solid #e2e8f0}
+.stat{text-align:center;padding:10px;border-radius:8px;border:1px solid #e2e8f0}
+.stat-n{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.stat-l{font-size:10.5px;color:#64748b;margin-top:2px}
+.content{padding:24px 48px}
+.summary-block{background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.summary-hd{padding:12px 16px;background:#1a3a6b;color:#fff;font-size:13px;font-weight:700}
+.tblw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+thead th{padding:8px 12px;background:#243c72;color:#fff;text-align:left;border:1px solid #1a2e55;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+td{padding:7px 12px;border:1px solid #e2e8f0;color:#374151;vertical-align:middle}
+tr:nth-child(even) td{background:#f8fafd}tr:hover td{background:#eff6ff}
+.footer{background:#1a3a6b;color:rgba(255,255,255,.7);padding:24px 48px;margin-top:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.footer-txt{font-size:11.5px}.footer-txt strong{color:#f59e0b}
+@media print{.content{padding:16px}.banner{padding:20px}}
+</style></head><body>
+<div class="banner">
+  <div class="banner-top">
+    <div><div class="b-title">🔒 AWS Security Audit Report</div><div class="b-sub">Powered by Prowler — Open Source Cloud Security</div></div>
+  </div>
+  <div style="color:#f59e0b;font-size:15px;font-weight:600;margin:8px 0 20px">Customer: ${cName}</div>
+  <div class="metas">
+    <div class="meta"><label>Account ID</label><span>${ST.account}</span></div>
+    <div class="meta"><label>Account Name</label><span>${ST.accName||ST.account}</span></div>
+    <div class="meta"><label>Total Failures</label><span>${d.totalFails||0}</span></div>
+    <div class="meta"><label>Services Affected</label><span>${d.totalServices||0}</span></div>
+    <div class="meta"><label>Generated</label><span>${now}</span></div>
+  </div>
+</div>
+<div class="stats">
+  <div class="stat" style="border-color:#e2e8f0"><div class="stat-n" style="color:#1a3a6b">${d.totalFails||0}</div><div class="stat-l">Total Failures</div></div>
+  <div class="stat" style="border-color:#e2e8f0"><div class="stat-n" style="color:#1a3a6b">${d.totalServices||0}</div><div class="stat-l">Services</div></div>
+  <div class="stat" style="border-color:#fca5a5;background:#fff5f5"><div class="stat-n" style="color:#dc2626">${sevCounts.critical}</div><div class="stat-l">Critical</div></div>
+  <div class="stat" style="border-color:#fdba74;background:#fff8f3"><div class="stat-n" style="color:#ea580c">${sevCounts.high}</div><div class="stat-l">High</div></div>
+  <div class="stat" style="border-color:#fde68a;background:#fffdf0"><div class="stat-n" style="color:#d97706">${sevCounts.medium}</div><div class="stat-l">Medium</div></div>
+  <div class="stat" style="border-color:#bbf7d0;background:#f0fdf4"><div class="stat-n" style="color:#16a34a">${sevCounts.low}</div><div class="stat-l">Low</div></div>
+</div>
+<div class="content">
+  <div class="summary-block">
+    <div class="summary-hd">📋 Summary — All Failures by Service</div>
+    <div class="tblw"><table>
+      <thead><tr><th style="min-width:160px">Service</th><th>Check Title</th><th style="min-width:110px">Severity</th></tr></thead>
+      <tbody>${summaryRows}</tbody>
+    </table></div>
+  </div>
+  <div style="margin-bottom:10px;font-size:12px;color:#64748b">Click a service button below to expand its failure details:</div>
+  ${accordionHtml}
+</div>
+<div class="footer">
+  <div class="footer-txt">Generated by <strong>Shellkode</strong> &nbsp;·&nbsp; Customer: <strong>${cName}</strong> &nbsp;·&nbsp; Account: <strong>${ST.account}</strong> &nbsp;·&nbsp; ${now}</div>
+</div>
+</body></html>`;
+
+  const fn=`${cName.replace(/[^a-zA-Z0-9_-]/g,'_')}_${ST.account}_security_audit.html`;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ─── Monthly XLSX ───
+function _exportMonthlyXLSX(cName,d){
+  if(typeof XLSX==='undefined'){alert('SheetJS not loaded');return}
+  const wb=XLSX.utils.book_new();
+  const months=d.billingMonths||[];
+  const m0=months[0]||'M1',m1=months[1]||'M2';
+  // Billing diff sheet
+  const billing=d.billing||{};
+  const billingRows=Object.entries(billing).filter(([,m])=>(m[m0]||0)>0.01||(m[m1]||0)>0.01)
+    .sort((a,b)=>(b[1][m1]||0)-(a[1][m1]||0))
+    .map(([svc,m])=>{
+      const c0=m[m0]||0,c1=m[m1]||0,diff=c1-c0;
+      return{Service:svc,[m0+' ($)']:parseFloat(c0.toFixed(4)),[m1+' ($)']:parseFloat(c1.toFixed(4)),'Difference ($)':parseFloat(diff.toFixed(4)),'Change (%)':c0>0?parseFloat(((diff/c0)*100).toFixed(1)):0};
+    });
+  addTableSheet(wb,`Billing ${m0} vs ${m1}`,billingRows);
+  addTableSheet(wb,'EC2 Utilization (30d)',d.ec2Utilization||[]);
+  addTableSheet(wb,'RDS Utilization (30d)',d.rdsUtilization||[]);
+  XLSX.writeFile(wb,`${cName.replace(/[^a-zA-Z0-9_-]/g,'_')}_${ST.account}_monthly_report.xlsx`);
+}
+
+// ─── Monthly DOCX — server-side generation ───
+async function exportMonthlyDOCX(){openExport('docx','monthly')}
+async function _exportMonthlyDOCX(cName,d){
+  try{
+    const resp=await fetch(`${apiBase()}/monthly/export_docx`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({customerName:cName,accountId:ST.account,
+        accName:ST.accName,data:d})});
+    if(!resp.ok){const e=await resp.json();alert('DOCX error: '+(e.error||resp.status));return;}
+    const blob=await resp.blob();
+    const fn=`${cName.replace(/[^a-zA-Z0-9_-]/g,'_')}_${ST.account}_monthly_report.docx`;
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;a.click();
+    URL.revokeObjectURL(a.href);
+  }catch(e){alert('DOCX download failed: '+e.message);}
+}
+
+
+// ═══════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function showAlert(id,msg){const el=document.getElementById(id);el.textContent=msg;el.style.display='block'}
+function setBtnL(bid,tid,msg){document.getElementById(bid).disabled=true;document.getElementById(tid).innerHTML=`<span class="spin" style="width:13px;height:13px;border-width:2px"></span> ${msg}`}
+function setBtnD(bid,tid,msg){document.getElementById(bid).disabled=false;document.getElementById(tid).textContent=msg}
+function signOut(){
+  ST={ak:'',sk:'',account:'',accName:'',username:'',arn:'',regions:new Set(),selected:new Set(),invData:{},costData:null,secData:null,monthlyData:null};
+  document.getElementById('accessKey').value='';document.getElementById('secretKey').value='';
+  document.getElementById('loginErr').style.display='none';document.getElementById('loginOk').style.display='none';
+  document.getElementById('connDot').classList.remove('on');document.getElementById('connText').textContent='Not connected';
+  setBtnD('loginBtn','loginTxt','Sign In');showPage('pageLogin');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  if(document.getElementById('pageLogin').classList.contains('active'))doLogin();
+  if(document.getElementById('exportOverlay').classList.contains('open'))confirmExport();
+});
+</script>
+</body>
+</html>
